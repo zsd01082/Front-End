@@ -1,63 +1,433 @@
 /**
- * 部署飞船按钮绑定事件
+ * 飞船
  */
-var launchButton = function() {
+var Spaceship = function(id, speed, disCharge, charge) {
+    this.id = id; //飞船ID
+    this.power = 100; //飞船电量百分比，初始为100
+    this.powerBarColor = "#70ed3f";
+    this.currState = "stop"; //飞船当前状态，初始为停止
+    this.Yoffset = 17 + "px"; //飞船Y轴初始位置
+    this.Xoffset = 22 + id * 50 + "px"; //飞船X轴初始位置
+    this.deg = 0; //飞船角度，初始为0
+    this.speed = speed //飞船飞行速度
+    this.disCharge = disCharge //飞船耗电速率(百分比)
+    this.charge = charge //飞船充电速率(百分比)
+    this.timer = null; //飞船飞行计时器
+    this.chanrgeTimer = null; //飞船充电计时器
+    this.dischanrgeTimer = null; //飞船放电计时器
+}
 
-    var currSystem = {
-        dynamicSystem: null,
-        powerSystem: null
+/**
+ * 飞船接受信息
+ */
+Spaceship.prototype.recive = function(msg) {
+    var spaceshipId, command;
+    switch (msg.substr(0, 2)) {
+        case "00":
+            spaceshipId = 1;
+            break;
+        case "01":
+            spaceshipId = 2;
+            break;
+        case "10":
+            spaceshipId = 3;
+            break;
+        case "11":
+            spaceshipId = 4;
+            break;
+    };
+    if (this.id != spaceshipId) return false;
+    switch (msg.substr(2, 4)) {
+        case "00":
+            command = "fly";
+            break;
+        case "01":
+            command = "stop";
+            break;
+    };
+    this.stateSystem().changeState(command);
+}
+
+/**
+ * 飞船状态改变系统
+ */
+Spaceship.prototype.stateSystem = function() {
+    var self = this;
+
+    var states = {
+        fly: function() {
+            self.currState = "fly";
+            self.dynamicSystem().fly();
+            self.powerSystem().disChargeSystem();
+        },
+        stop: function() {
+            self.currState = "stop";
+            self.dynamicSystem().stop();
+        },
     };
 
-    //添加部署飞船按钮点击事件
-    var buttonOnclick = function() {
-        if (!document.getElementById("launchSpaceship")) return false;
-        var button = document.getElementById("launchSpaceship");
-        button.onclick = function() {
-            var system = launchButton().getCurrSystem();
-            console.log(system);
-        };
-    };
-
-    //获取用户选择的系统
-    var getCurrSystem = function() {
-        if (!document.getElementById("launchPanel")) return false;
-        var systems = ["dynamicSystem", "powerSystem"];
-        for (var key in systems) {
-            var radios = document.getElementsByName(systems[key]);
-            for (var i in radios) {
-                if (radios[i].checked) {
-                    currSystem[systems[key]] = radios[i].value;
-                    break;
-                };
-            };
-        };
-        return currSystem;
+    var changeState = function(state) {
+        if (state == self.currState) return false;
+        states[state]();
     };
 
     return {
-        buttonOnclick: buttonOnclick,
-        getCurrSystem: getCurrSystem,
+        changeState: changeState
+    }
+}
+
+/**
+ * 飞船能源系统
+ */
+Spaceship.prototype.powerSystem = function() {
+    var self = this;
+
+    var chargeSystem = function() {
+        clearInterval(self.chargeTimer);
+        self.chargeTimer = setInterval((function() {
+            //若飞船被摧毁时，停止充电
+            if (self.currState == "destroyed") {
+                clearInterval(self.chargeTimer);
+                return false;
+            };
+            self.power += self.charge * 0.01;
+            if (self.power >= 100) self.power = 100; //电量最高为100
+            render().powerBar(self);
+            return true;
+        }), 10);
+    };
+
+    var disChargeSystem = function() {
+        clearInterval(self.dischargeTimer);
+        self.dischargeTimer = setInterval((function() {
+            //若飞船停止或被摧毁时，停止放电
+            if (self.currState == "stop") {
+                clearInterval(self.dischargeTimer);
+                return false;
+            };
+
+            self.power -= self.disCharge * 0.01;
+            if (self.power <= 0) {
+                self.power = 0; //电量最低为0
+                self.stateSystem().changeState("stop"); //电量不足时停止飞行
+            };
+            render().powerBar(self);
+            return true;
+        }), 10);
+    };
+
+    return {
+        chargeSystem: chargeSystem,
+        disChargeSystem: disChargeSystem
+    }
+};
+
+/**
+ * 飞船动力系统
+ */
+Spaceship.prototype.dynamicSystem = function() {
+    var self = this;
+
+    var fly = function() {
+        clearInterval(self.timer);
+        self.timer = setInterval((function() {
+            self.deg -= self.speed / parseFloat(self.Xoffset);
+            if (self.deg <= -360) self.deg = 0; //如果飞船角度大于360，重置角度
+            render().spaceshipRotate(self);
+        }), 10);
+        consoleDisplay("spaceship No." + self.id + "已经起飞！！！");
+    };
+
+    var stop = function() {
+        clearInterval(self.timer);
+        consoleDisplay("spaceship No." + self.id + "已经停止！！！");
+    }
+
+    return {
+        fly: fly,
+        stop: stop,
     };
 };
 
 /**
- * 控制台信息显示
+ * 轨道，单例对象用于储存各个轨道飞船信息
  */
-var consoleDisplay = (function() {
-    var consolePanel = document.getElementById("console");
-    var show = function(info) {
-        var infomation = document.createElement("p");
-        var infomationText = document.createTextNode(info);
-        infomation.appendChild(infomationText);
-        consolePanel.appendChild(infomation);
+var orbit = {
+    1: "empty",
+    2: "empty",
+    3: "empty",
+    4: "empty"
+};
+
+/**
+ * 指挥官 ，单例对象，发送以及获取信息，绑定DOM
+ */
+var commander = {
+    id: null,
+    command: null,
+    dynamicSystem: null,
+    powerSystem: null,
+
+    //将信息传递给BUS
+    sendToBUS: function() {
+        var msg = {
+            id: this.id,
+            command: this.command,
+            dynamicSystem: this.dynamicSystem,
+            powerSystem: this.powerSystem
+        }
+        BUS.recive(msg);
+    }
+};
+
+/**
+ * BUS介质
+ */
+var BUS = {
+    //接受信息
+    recive: function(msg) {
+        setTimeout((function() {
+            if (Math.random() < 0.1) {
+                consoleDisplay("消息传送失败，正在重试...");
+                BUS.recive(msg);
+            } else {
+                BUS.send(msg);
+            }
+        }), 300);
+    },
+
+    //处理发送信息
+    send: function(msg) {
+        if (msg.command == "launch") {
+            var speed, disCharge, charge;
+            switch (msg.dynamicSystem) {
+                case "1":
+                    speed = 30;
+                    disCharge = 5;
+                    break;
+                case "2":
+                    speed = 50;
+                    disCharge = 7;
+                    break;
+                case "3":
+                    speed = 80;
+                    disCharge = 9;
+                    break;
+            };
+            switch (msg.powerSystem) {
+                case "1":
+                    charge = 2;
+                    break;
+                case "2":
+                    charge = 3;
+                    break;
+                case "3":
+                    charge = 4;
+                    break;
+            };
+            var spaceship = new Spaceship(msg.id, speed, disCharge, charge);
+            orbit[msg.id] = spaceship;
+            spaceship.powerSystem().chargeSystem();
+            controlPanel(spaceship);
+            render().create(spaceship);
+            consoleDisplay("spaceship No." + spaceship.id + "成功部署，位于轨道" + spaceship.id + "!!!");
+        };
+        if (msg.command == "fly" || msg.command == "stop") {
+            msg = this.adapter(msg);
+            for (var i in orbit) {
+                if (orbit[i] != "empty") {
+                    orbit[i].recive(msg);
+                }
+            };
+        };
+        if (msg.command == "destroy") {
+            clearInterval(orbit[msg.id].timer);
+            clearInterval(orbit[msg.id].chargeTimer);
+            clearInterval(orbit[msg.id].dischargeTimer);
+            render().remove(orbit[msg.id]);
+            orbit[msg.id] = "empty";
+        };
+    },
+
+    //将json格式转化为2进制格式
+    adapter: function(msg) {
+        var sMsg = "";
+        switch (msg.id) {
+            case "1":
+                sMsg += "00";
+                break;
+            case "2":
+                sMsg += "01";
+                break;
+            case "3":
+                sMsg += "10";
+                break;
+            case "4":
+                sMsg += "11";
+                break;
+        };
+        switch (msg.command) {
+            case "fly":
+                sMsg += "00";
+                break;
+            case "stop":
+                sMsg += "01";
+                break;
+        };
+        return sMsg;
+    },
+}
+
+//部署飞船按钮点击事件
+var buttonOnclick = function() {
+    if (!document.getElementById("launchSpaceship")) return false;
+    var button = document.getElementById("launchSpaceship");
+    button.onclick = function() {
+        for (var i in orbit) {
+            if (orbit[i] == "empty") {
+                commander.id = i;
+                break;
+            } else if (i >= 4) {
+                consoleDisplay("没有足够的轨道放置飞船！！！");
+                return false;
+            };
+        };
+        commander.command = "launch";
+        getCurrSystem();
+        commander.sendToBUS();
     };
+};
+
+//获取用户选择的系统
+var getCurrSystem = function() {
+    if (!document.getElementById("launchPanel")) return false;
+    var systems = ["dynamicSystem", "powerSystem"];
+    for (var key in systems) {
+        var radios = document.getElementsByName(systems[key]);
+        for (var i in radios) {
+            if (radios[i].checked) {
+                commander[systems[key]] = radios[i].value;
+                break;
+            };
+            if (i >= 4) {
+                consoleDisplay("请选择飞船的" + systems[key] + "!!!");
+                return false;
+            }
+        };
+    };
+};
+
+//添加飞船操作按钮
+var controlPanel = function(spaceship) {
+    var commandPanel = document.getElementById("commandPanel");
+    var spaceshipControl = document.createElement("div");
+    spaceshipControl.id = "spaceship No." + spaceship.id;
+    var spaceshipName = document.createTextNode("spaceship No." + spaceship.id);
+    var flyButton = document.createElement("button");
+    flyButton.innerHTML = "启动";
+    flyButton.name = "fly";
+    flyButton.onclick = function() {
+        commander.id = this.parentElement.id.substr(-1);
+        commander.command = this.name;
+        commander.sendToBUS();
+    };
+    var stopButton = document.createElement("button");
+    stopButton.innerHTML = "停止";
+    stopButton.name = "stop";
+    stopButton.onclick = function() {
+        commander.id = this.parentElement.id.substr(-1);
+        commander.command = this.name;
+        commander.sendToBUS();
+    };
+    var destroyButton = document.createElement("button");
+    destroyButton.innerHTML = "摧毁";
+    destroyButton.name = "destroy";
+    destroyButton.onclick = function() {
+        commander.id = this.parentElement.id.substr(-1);
+        commander.command = this.name;
+        commander.sendToBUS();
+    };
+    spaceshipControl.appendChild(spaceshipName);
+    spaceshipControl.appendChild(flyButton);
+    spaceshipControl.appendChild(stopButton);
+    spaceshipControl.appendChild(destroyButton);
+    commandPanel.appendChild(spaceshipControl);
+}
+
+/**
+ * 渲染飞船
+ */
+var render = function() {
+    var create = function(spaceship) {
+        //创建飞船
+        var spaceshipBody = document.createElement("img");
+        spaceshipBody.src = "img/space.png";
+        spaceshipBody.style.width = "50px";
+        spaceshipBody.style.position = "absolute";
+        //创建电量条
+        var powerBar = document.createElement("div");
+        powerBar.style.width = "30px";
+        powerBar.style.height = "2px";
+        powerBar.style.marginLeft = "11px";
+        powerBar.style.backgroundColor = spaceship.powerBarColor;
+        powerBar.style.position = "absolute";
+        //将飞船与电量条添加进页面
+        var spaceshipDiv = document.createElement("div");
+        spaceshipDiv.appendChild(powerBar);
+        spaceshipDiv.appendChild(spaceshipBody);
+        galaxy.appendChild(spaceshipDiv);
+        spaceshipDiv.id = spaceship.id;
+        spaceshipDiv.style.position = "absolute";
+        spaceshipDiv.style.bottom = spaceship.Yoffset;
+        spaceshipDiv.style.left = spaceship.Xoffset;
+        spaceshipDiv.style.transformOrigin = "-" + spaceship.Xoffset + " " + spaceship.Yoffset;
+    };
+
+    var spaceshipRotate = function(spaceship) {
+        var spaceshipBody = document.getElementById(spaceship.id);
+        spaceshipBody.style.transform = "rotate(" + spaceship.deg + "deg)";
+    };
+
+    var powerBar = function(spaceship) {
+        var powerDiv = document.getElementById(spaceship.id).firstElementChild;
+        powerDiv.style.width = 30 * (spaceship.power / 100) + "px";
+        if (spaceship.power > 50) {
+            powerDiv.style.backgroundColor = "#70ed3f";
+        } else if (spaceship.power > 15) {
+            powerDiv.style.backgroundColor = "#fccd1f";
+        } else {
+            powerDiv.style.backgroundColor = "#fb0000";
+        };
+
+    };
+
+    var remove = function(spaceship) {
+        var spaceshipDiv = document.getElementById(spaceship.id);
+        spaceshipDiv.parentElement.removeChild(spaceshipDiv);
+        var spaceshipPanel = document.getElementById("spaceship No." + spaceship.id);
+        spaceshipPanel.parentElement.removeChild(spaceshipPanel);
+    }
 
     return {
-        show: show
-    };
+        create: create,
+        spaceshipRotate: spaceshipRotate,
+        powerBar: powerBar,
+        remove: remove
+    }
+}
 
-})();
+/**
+ * 控制台信息显示
+ */
+var consoleDisplay = function(info) {
+    var consolePanel = document.getElementById("console");
+    var infomation = document.createElement("p");
+    var infomationText = document.createTextNode(info);
+    infomation.appendChild(infomationText);
+    consolePanel.appendChild(infomation);
+};
 
 window.onload = function() {
-    launchButton().buttonOnclick();
+    buttonOnclick();
+    render();
 };
