@@ -20,32 +20,54 @@ var Spaceship = function(id, speed, disCharge, charge) {
 /**
  * 飞船接受信息
  */
-Spaceship.prototype.recive = function(msg) {
-    var spaceshipId, command;
-    switch (msg.substr(0, 2)) {
-        case "00":
-            spaceshipId = 1;
-            break;
-        case "01":
-            spaceshipId = 2;
-            break;
-        case "10":
-            spaceshipId = 3;
-            break;
-        case "11":
-            spaceshipId = 4;
-            break;
+Spaceship.prototype.recive = function(binaryMsg) {
+    var jsonMsg = this.adapter().binaryToJson(binaryMsg);
+    if (this.id != jsonMsg.id) return false;
+    this.stateSystem().changeState(jsonMsg.command);
+}
+
+/**
+ * adapter 模块
+ */
+Spaceship.prototype.adapter = function() {
+
+    var binaryToJson = function(binaryMsg) {
+        var spaceshipId, command;
+        switch (binaryMsg.substr(0, 4)) {
+            case "0001":
+                spaceshipId = 1;
+                break;
+            case "0010":
+                spaceshipId = 2;
+                break;
+            case "0100":
+                spaceshipId = 3;
+                break;
+            case "1000":
+                spaceshipId = 4;
+                break;
+        };
+        switch (binaryMsg.substr(4, 8)) {
+            case "0001":
+                command = "fly";
+                break;
+            case "0010":
+                command = "stop";
+                break;
+            case "1100":
+                command = "destroy";
+                break;
+        };
+        var jsonMsg = {
+            id: spaceshipId,
+            command: command
+        };
+        return jsonMsg;
     };
-    if (this.id != spaceshipId) return false;
-    switch (msg.substr(2, 4)) {
-        case "00":
-            command = "fly";
-            break;
-        case "01":
-            command = "stop";
-            break;
+
+    return {
+        binaryToJson: binaryToJson
     };
-    this.stateSystem().changeState(command);
 }
 
 /**
@@ -64,6 +86,12 @@ Spaceship.prototype.stateSystem = function() {
             self.currState = "stop";
             self.dynamicSystem().stop();
         },
+        destroy: function() {
+            self.currState = "destroyed";
+            clearInterval(self.timer);
+            render().remove(self);
+            orbit[self.id] = "empty";
+        }
     };
 
     var changeState = function(state) {
@@ -101,7 +129,7 @@ Spaceship.prototype.powerSystem = function() {
         clearInterval(self.dischargeTimer);
         self.dischargeTimer = setInterval((function() {
             //若飞船停止或被摧毁时，停止放电
-            if (self.currState == "stop") {
+            if (self.currState == "stop" || self.currState == "destroyed") {
                 clearInterval(self.dischargeTimer);
                 return false;
             };
@@ -232,21 +260,21 @@ var BUS = {
             render().create(spaceship);
             consoleDisplay("spaceship No." + spaceship.id + "成功部署，位于轨道" + spaceship.id + "!!!");
         };
-        if (msg.command == "fly" || msg.command == "stop") {
+        if (msg.command == "fly" || msg.command == "stop" || msg.command == "destroy") {
             msg = this.adapter(msg);
             for (var i in orbit) {
                 if (orbit[i] != "empty") {
                     orbit[i].recive(msg);
-                }
+                };
             };
         };
-        if (msg.command == "destroy") {
+        /* if (msg.command == "destroy") {
             clearInterval(orbit[msg.id].timer);
             clearInterval(orbit[msg.id].chargeTimer);
             clearInterval(orbit[msg.id].dischargeTimer);
             render().remove(orbit[msg.id]);
             orbit[msg.id] = "empty";
-        };
+        }; */
     },
 
     //将json格式转化为2进制格式
@@ -254,24 +282,27 @@ var BUS = {
         var sMsg = "";
         switch (msg.id) {
             case "1":
-                sMsg += "00";
+                sMsg += "0001";
                 break;
             case "2":
-                sMsg += "01";
+                sMsg += "0010";
                 break;
             case "3":
-                sMsg += "10";
+                sMsg += "0100";
                 break;
             case "4":
-                sMsg += "11";
+                sMsg += "1000";
                 break;
         };
         switch (msg.command) {
             case "fly":
-                sMsg += "00";
+                sMsg += "0001";
                 break;
             case "stop":
-                sMsg += "01";
+                sMsg += "0010";
+                break;
+            case "destroy":
+                sMsg += "1100";
                 break;
         };
         return sMsg;
