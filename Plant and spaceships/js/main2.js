@@ -15,6 +15,7 @@ var Spaceship = function(id, speed, disCharge, charge) {
     this.timer = null; //飞船飞行计时器
     this.chanrgeTimer = null; //飞船充电计时器
     this.dischanrgeTimer = null; //飞船放电计时器
+    this.DCtimer = null;
 }
 
 /**
@@ -27,9 +28,18 @@ Spaceship.prototype.recive = function(binaryMsg) {
 }
 
 /**
+ * 飞船发送信息
+ */
+Spaceship.prototype.send = function() {
+    var binaryMsg = this.adapter().jsonToBinary();
+    DC().recive(binaryMsg);
+}
+
+/**
  * adapter 模块
  */
 Spaceship.prototype.adapter = function() {
+    var self = this;
 
     var binaryToJson = function(binaryMsg) {
         var spaceshipId, command;
@@ -65,8 +75,51 @@ Spaceship.prototype.adapter = function() {
         return jsonMsg;
     };
 
+    var jsonToBinary = function() {
+        var msg = "";
+        switch (self.id) {
+            case "1":
+                msg += "0001";
+                break;
+            case "2":
+                msg += "0010";
+                break;
+            case "3":
+                msg += "0100";
+                break;
+            case "4":
+                msg += "1000";
+                break;
+        };
+        switch (self.speed) {
+            case 30:
+                msg += "0001";
+                break;
+            case 50:
+                msg += "0010";
+                break;
+            case 80:
+                msg += "0100";
+                break;
+        };
+        switch (self.currState) {
+            case "fly":
+                msg += "0001";
+                break;
+            case "stop":
+                msg += "0010";
+                break;
+            case "destroyed":
+                msg += "0100";
+                break;
+        };
+        msg += (parseInt(self.power).toString(2));
+        return msg;
+    }
+
     return {
-        binaryToJson: binaryToJson
+        binaryToJson: binaryToJson,
+        jsonToBinary: jsonToBinary
     };
 }
 
@@ -91,6 +144,8 @@ Spaceship.prototype.stateSystem = function() {
             clearInterval(self.timer);
             render().remove(self);
             orbit[self.id] = "empty";
+            clearInterval(self.DCtimer);
+            self.send();
         }
     };
 
@@ -227,6 +282,7 @@ var BUS = {
     //处理发送信息
     send: function(msg) {
         if (msg.command == "launch") {
+            if (orbit[msg.id] != "empty") return false;
             var speed, disCharge, charge;
             switch (msg.dynamicSystem) {
                 case "1":
@@ -258,6 +314,9 @@ var BUS = {
             spaceship.powerSystem().chargeSystem();
             controlPanel(spaceship);
             render().create(spaceship);
+            spaceship.DCtimer = setInterval((function() {
+                spaceship.send();
+            }), 10);
             consoleDisplay("spaceship No." + spaceship.id + "成功部署，位于轨道" + spaceship.id + "!!!");
         };
         if (msg.command == "fly" || msg.command == "stop" || msg.command == "destroy") {
@@ -382,7 +441,11 @@ var controlPanel = function(spaceship) {
     spaceshipControl.appendChild(flyButton);
     spaceshipControl.appendChild(stopButton);
     spaceshipControl.appendChild(destroyButton);
-    commandPanel.appendChild(spaceshipControl);
+    if (document.getElementById("spaceship No." + (parseInt(spaceship.id) + 1))) {
+        commandPanel.insertBefore(spaceshipControl, document.getElementById("spaceship No." + (parseInt(spaceship.id) + 1)))
+    } else {
+        commandPanel.appendChild(spaceshipControl);
+    };
 }
 
 /**
@@ -448,6 +511,103 @@ var render = function() {
 }
 
 /**
+ * DC 用于接收飞船信息并显示
+ */
+var DC = function() {
+    var self = DC;
+
+    var displayTable = document.getElementById("spaceshipInfo");
+
+    var create = function(msg) {
+        var tr = document.createElement("tr");
+        tr.id = "table" + msg.id;
+        var tdContent = ["id", "speed", "currState", "power"];
+        for (var i in tdContent) {
+            var td = document.createElement("td");
+            td.innerHTML = msg[tdContent[i]];
+            tr.appendChild(td);
+        };
+        if (document.getElementById("table" + (msg.id + 1))) {
+            displayTable.insertBefore(tr, document.getElementById("table" + (msg.id + 1)));
+        } else {
+            displayTable.appendChild(tr);
+        };
+    };
+
+    var recive = function(binaryMsg) {
+        var msg = self().adapter(binaryMsg);
+        var tr = displayTable.getElementsByTagName("tr");
+        if (!document.getElementById("table" + msg.id)) self().create(msg);
+        if (msg.currState == "destroyed") {
+            self().del(msg.id);
+            return false;
+        };
+        self().update(msg);
+    };
+
+    var del = function(id) {
+        var tr = document.getElementById("table" + id);
+        displayTable.removeChild(tr);
+    }
+
+    var update = function(msg) {
+        var tr = document.getElementById("table" + msg.id);
+        var td = tr.getElementsByTagName("td");
+        td[2].innerHTML = msg.currState;
+        td[3].innerHTML = msg.power;
+    };
+
+    var adapter = function(binaryMsg) {
+        var msg = {};
+        switch (binaryMsg.substr(0, 4)) {
+            case "0001":
+                msg.id = 1;
+                break;
+            case "0010":
+                msg.id = 2;
+                break;
+            case "0100":
+                msg.id = 3;
+                break;
+            case "1000":
+                msg.id = 4;
+                break;
+        };
+        switch (binaryMsg.substr(4, 4)) {
+            case "0001":
+                msg.speed = 30;
+                break;
+            case "0010":
+                msg.speed = 50;
+                break;
+            case "0100":
+                msg.speed = 80;
+                break;
+        };
+        switch (binaryMsg.substr(8, 4)) {
+            case "0001":
+                msg.currState = "fly";
+                break;
+            case "0010":
+                msg.currState = "stop";
+                break;
+            case "0100":
+                msg.currState = "destroyed";
+                break;
+        };
+        msg.power = parseInt((binaryMsg.substr(12)), 2);
+        return msg;
+    };
+    return {
+        create: create,
+        adapter: adapter,
+        recive: recive,
+        update: update,
+        del: del
+    };
+};
+
+/**
  * 控制台信息显示
  */
 var consoleDisplay = function(info) {
@@ -461,4 +621,5 @@ var consoleDisplay = function(info) {
 window.onload = function() {
     buttonOnclick();
     render();
+    DC();
 };
