@@ -1,0 +1,56 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 800px;
+}
+
+#form {
+    margin: 300px auto 0 auto;
+    font-family: "黑体";
+    font-size: 28px;
+    display: table;
+}
+
+#form input {
+    height: 30px;
+    width: 250px;
+    vertical-align: text-bottom;
+    font-size: 20px;
+    border-radius: 5px;
+    border: 1px solid #acacac;
+    outline: none;
+    padding-left: 10px;
+}
+
+#form input:focus {
+    border-color: #7b9cd3;
+}
+
+#form button {
+    height: 30px;
+    width: 50px;
+    background-color: #2f79ba;
+    color: #ffffff;
+    border: none;
+    vertical-align: text-bottom;
+    border-radius: 5px;
+    margin-left: 10px;
+    outline: none;
+}
+
+#result {
+    font-size: 20px;
+    color: #acacac;
+    padding-left: 84px;
+}
+
+#warning {
+    font-size: 18px;
+    font-family: monospace;
+}
+
+#warning ul {
+    padding-left: 20px;
+}

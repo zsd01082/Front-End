@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Form vaildation</title>
+    <link rel="stylesheet" href="layout.css">
+</head>
+
+<body>
+    <form id="form">
+        <label for="name">名称：</label>
+        <input type="text" id="formText">
+        <button type="button" id="vaildation">验证</button>
+        <div id="result"></div>
+        <div id="warning">
+            <ul>
+                <li>长度应在4~16字符之间</li>
+                <li>名称可以包含：中文、英文、数字</li>
+                <li>不能包含：标点符号 空格 特殊字符</li>
+                <li>每个汉字长度为2</li>
+            </ul>
+        </div>
+    </form>
+
+    <script src="js/global.js"></script>
+</body>
+
+</html>
