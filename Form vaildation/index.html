@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -10,22 +9,37 @@
 </head>
 
 <body>
-    <form id="form">
-        <label for="name">名称：</label>
-        <input type="text" id="formText">
+    <form>
+        <div>
+            <label for="name">名称：</label>
+            <input type="text" id="name">
+            <div class="tip"></div>
+        </div>
+        <div>
+            <label for="password">密码：</label>
+            <input type="password" id="password">
+            <div class="tip"></div>
+        </div>
+        <div>
+            <label for="ppassword">密码确认：</label>
+            <input type="password" id="ppassword">
+            <div class="tip"></div>
+        </div>
+        <div>
+            <label for="phone">手机：</label>
+            <input type="text" id="phone">
+            <div class="tip"></div>
+        </div>
+        <div>
+            <label for="email">邮箱：</label>
+            <input type="email" id="email">
+            <div class="tip"></div>
+        </div>
         <button type="button" id="vaildation">验证</button>
-        <div id="result"></div>
-        <div id="warning">
-            <ul>
-                <li>长度应在4~16字符之间</li>
-                <li>名称可以包含：中文、英文、数字</li>
-                <li>不能包含：标点符号 空格 特殊字符</li>
-                <li>每个汉字长度为2</li>
-            </ul>
         </div>
     </form>
 
-    <script src="js/global.js"></script>
+    <script src="js/global.js" charset="UTF-8"></script>
 </body>
 
 </html>

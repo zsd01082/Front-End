@@ -6,14 +6,19 @@ body {
     min-width: 800px;
 }
 
-#form {
+form {
     margin: 300px auto 0 auto;
     font-family: "黑体";
     font-size: 28px;
     display: table;
+    width: 600px;
 }
 
-#form input {
+form>div {
+    height: 60px;
+}
+
+form input {
     height: 30px;
     width: 250px;
     vertical-align: text-bottom;
@@ -24,13 +29,15 @@ body {
     padding-left: 10px;
 }
 
-#form input:focus {
-    border-color: #7b9cd3;
+form label {
+    width: 180px;
+    text-align: end;
+    display: inline-block;
 }
 
-#form button {
+#vaildation {
     height: 30px;
-    width: 50px;
+    width: 100%;
     background-color: #2f79ba;
     color: #ffffff;
     border: none;
@@ -40,17 +47,8 @@ body {
     outline: none;
 }
 
-#result {
+.tip {
     font-size: 20px;
     color: #acacac;
-    padding-left: 84px;
-}
-
-#warning {
-    font-size: 18px;
-    font-family: monospace;
-}
-
-#warning ul {
-    padding-left: 20px;
+    padding-left: 194px;
 }
