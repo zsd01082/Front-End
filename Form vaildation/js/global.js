@@ -22,8 +22,18 @@ var initButton = function() {
             result.style.color = "#dd0007";
             result.innerText = "名称不合法，请重新输入！！！";
             return false;
-        }
-        if (reg[0].length < 4 || reg[0].length > 16) {
+        };
+        //计算字符串长度
+        var len = 0;
+        reg = formText.match(/[A-Za-z0-9]/g);
+        if (reg) {
+            len += reg.length;
+        };
+        reg = formText.match(/[\u4E00-\u9FA5]/g);
+        if (reg) {
+            len += reg.length * 2;
+        };
+        if (len < 4 || len > 16) {
             formInput.style.borderColor = "#dd0007";
             result.style.color = "#dd0007";
             result.innerText = "名称长度不符合要求，请重新输入！！！";
