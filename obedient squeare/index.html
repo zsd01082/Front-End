@@ -9,7 +9,17 @@
 </head>
 
 <body>
-    <canvas id="id-canvas" width="1000px" height="1000px" style="margin-left:400px;margin-top:200px"></canvas>
+    <canvas id="id-canvas" width="600px" height="600px" style="margin-left:400px;margin-top:200px"></canvas>
+    <fieldset style="border:none;padding-left:500px">
+        <select id="id-command">
+        <option value="go">GO</option>
+        <option value="left">TUN LEF</option>
+        <option value="right">TUN RIG</option>
+        <option value="back">TUN BAC</option>
+    </select>
+        <button id="id-run">执行</button>
+    </fieldset>
+
     <script src="map.js"></script>
     <script src="square.js"></script>
     <script src="game.js"></script>

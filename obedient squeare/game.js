@@ -8,16 +8,41 @@ var Game = function() {
 
     g.drawSquare = function() {
         var o = g.square
+        var dir = o.direction * Math.PI / 180
 
-        ctx.beginPath()
-        ctx.rect(o.x * 50 + 50, o.y * 50 + 50, 50, 50)
+        //旋转原点
+        var x = o.x * 50 + 25
+        var y = o.y * 50 + 25
+        ctx.translate(x, y)
+        ctx.rotate(dir)
         ctx.fillStyle = "red"
-        ctx.fill()
-
-        ctx.beginPath()
-        ctx.rect(o.x * 50 + 50, o.y * 50 + 50, 50, 10)
+        ctx.fillRect(-24, -24, 48, 48)
         ctx.fillStyle = "blue"
-        ctx.fill()
+        ctx.fillRect(-24, -24, 48, 8)
+        ctx.rotate(-dir)
+        ctx.translate(-x, -y)
+    }
+
+    var runButton = document.getElementById("id-run")
+    runButton.onclick = function() {
+        g.clear()
+        var command = document.getElementById("id-command").value
+        g.square.actions(command)
+        g.drawSquare()
+    }
+
+    g.clear = function() {
+        var o = g.square
+        var dir = o.direction * Math.PI / 180
+
+        //旋转原点
+        var x = o.x * 50 + 25
+        var y = o.y * 50 + 25
+        ctx.translate(x, y)
+        ctx.rotate(dir)
+        ctx.clearRect(-24, -24, 48, 48)
+        ctx.rotate(-dir)
+        ctx.translate(-x, -y)
     }
 
     return g

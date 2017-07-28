@@ -7,4 +7,6 @@ var __main = function() {
     game.drawSquare()
 }
 
+var log = console.log.bind()
+
 __main()
