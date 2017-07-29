@@ -6,13 +6,18 @@ var Game = function() {
 
     g.square = new Square
 
-    g.drawSquare = function() {
+    g.map = new Map()
+
+    g.draw = function() {
+        g.map.drawCoordinate()
+        g.map.drawGrid()
+
         var o = g.square
         var dir = o.direction * Math.PI / 180
 
         //旋转原点
-        var x = o.x * 50 + 25
-        var y = o.y * 50 + 25
+        var x = o.x
+        var y = o.y
         ctx.translate(x, y)
         ctx.rotate(dir)
         ctx.fillStyle = "red"
@@ -25,25 +30,18 @@ var Game = function() {
 
     var runButton = document.getElementById("id-run")
     runButton.onclick = function() {
-        g.clear()
         var command = document.getElementById("id-command").value
         g.square.actions(command)
-        g.drawSquare()
     }
 
     g.clear = function() {
-        var o = g.square
-        var dir = o.direction * Math.PI / 180
-
-        //旋转原点
-        var x = o.x * 50 + 25
-        var y = o.y * 50 + 25
-        ctx.translate(x, y)
-        ctx.rotate(dir)
-        ctx.clearRect(-24, -24, 48, 48)
-        ctx.rotate(-dir)
-        ctx.translate(-x, -y)
+        ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight)
     }
+
+    setInterval((function() {
+        g.clear()
+        g.draw()
+    }), 10)
 
     return g
 }

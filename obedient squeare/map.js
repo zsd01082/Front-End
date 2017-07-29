@@ -9,6 +9,7 @@ var Map = function() {
 
 
     m.drawGrid = function() {
+        ctx.fillStyle = "black"
         for (var i = 1; i <= m.rows + 1; i++) {
             ctx.beginPath()
             ctx.moveTo(50, i * 50)
@@ -26,6 +27,7 @@ var Map = function() {
     }
 
     m.drawCoordinate = function() {
+        ctx.fillStyle = "black"
         for (var i = 1; i <= m.rows; i++) {
             ctx.fillText(i, i * 50 + 20, 25)
         }
