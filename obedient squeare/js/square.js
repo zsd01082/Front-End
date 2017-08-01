@@ -5,6 +5,7 @@ class Square {
         this.direction = 0
         this.animating = false
         var self = this
+        var animating = false
     }
 
 
@@ -29,12 +30,12 @@ class Square {
     tunLef() {
         if (this.animating == true) return false
 
-        var i = 0
         this.animating = true
 
+        var i = 0
         var self = this
-        this.timer = setInterval((function() {
-            var reg = self.direction
+        var reg = self.direction
+        requestAnimationFrame(function timer() {
             reg--
             i++
             if (reg < 0) {
@@ -42,21 +43,22 @@ class Square {
             }
             self.direction = reg
             if (i == 90) {
-                clearInterval(self.timer)
                 self.animating = false
+            } else {
+                requestAnimationFrame(timer)
             }
-        }), 1000 / 120)
+        })
     }
 
     tunRig() {
         if (this.animating == true) return false
 
-        var i = 0
         this.animating = true
 
+        var i = 0
         var self = this
-        this.timer = setInterval((function() {
-            var reg = self.direction
+        var reg = self.direction
+        requestAnimationFrame(function timer() {
             reg++
             i++
             if (reg >= 360) {
@@ -64,21 +66,22 @@ class Square {
             }
             self.direction = reg
             if (i == 90) {
-                clearInterval(self.timer)
                 self.animating = false
+            } else {
+                requestAnimationFrame(timer)
             }
-        }), 1000 / 120)
+        })
     }
 
     tunBac() {
         if (this.animating == true) return false
 
-        var i = 0
         this.animating = true
 
+        var i = 0
         var self = this
-        this.timer = setInterval((function() {
-            var reg = self.direction
+        var reg = self.direction
+        requestAnimationFrame(function timer() {
             reg++
             i++
             if (reg >= 360) {
@@ -86,82 +89,87 @@ class Square {
             }
             self.direction = reg
             if (i == 180) {
-                clearInterval(self.timer)
                 self.animating = false
+            } else {
+                requestAnimationFrame(timer)
             }
-        }), 1000 / 120)
+        })
     }
 
     traLef() {
         if (this.animating == true) return false
         if (this.x <= 75) return false
 
-        var i = 0
         this.animating = true
 
+        var i = 0
         var self = this
-        this.timer = setInterval((function() {
-            self.x--
-                i++
-                if (i == 50) {
-                    clearInterval(self.timer)
-                    self.animating = false
-                }
-        }), 1000 / 120)
+        requestAnimationFrame(function timer() {
+            self.x -= 1
+            i += 1
+            if (i == 50) {
+                self.animating = false
+            } else {
+                requestAnimationFrame(timer)
+            }
+        })
     }
 
     traTop() {
         if (this.animating == true) return false
         if (this.y <= 75) return false
 
-        var i = 0
         this.animating = true
 
+        var i = 0
         var self = this
-        this.timer = setInterval((function() {
-            self.y--
-                i++
-                if (i == 50) {
-                    clearInterval(self.timer)
-                    self.animating = false
-                }
-        }), 1000 / 120)
+        requestAnimationFrame(function timer() {
+            self.y -= 1
+            i += 1
+            if (i == 50) {
+                self.animating = false
+            } else {
+                requestAnimationFrame(timer)
+            }
+        })
     }
 
     traRig() {
         if (this.animating == true) return false
         if (this.x >= 525) return false
 
-        var i = 0
         this.animating = true
 
+        var i = 0
         var self = this
-        this.timer = setInterval((function() {
-            self.x++
-                i++
-                if (i == 50) {
-                    clearInterval(self.timer)
-                    self.animating = false
-                }
-        }), 1000 / 120)
+        requestAnimationFrame(function timer() {
+            self.x += 1
+            i += 1
+            if (i == 50) {
+                self.animating = false
+            } else {
+                requestAnimationFrame(timer)
+            }
+        })
     }
 
     traBot() {
         if (this.animating == true) return false
         if (this.y >= 525) return false
 
-        var i = 0
         this.animating = true
 
+        var i = 0
         var self = this
-        this.timer = setInterval((function() {
-            self.y++
-                i++
-                if (i == 50) {
-                    clearInterval(self.timer)
-                    self.animating = false
-                }
-        }), 1000 / 120)
+        requestAnimationFrame(function timer() {
+            self.y += 1
+            i += 1
+            if (i == 50) {
+                self.animating = false
+            } else {
+                requestAnimationFrame(timer)
+            }
+        })
     }
 
     movLef() {
@@ -181,18 +189,19 @@ class Square {
         }
 
         var self = this
-        this.timer = setInterval((function() {
+        requestAnimationFrame(function timer() {
             reg += dir
             if (reg < 0) {
                 reg += 360
             }
             self.direction = reg
             if (reg == 270) {
-                clearInterval(self.timer)
                 self.animating = false
                 self.traLef()
+            } else {
+                requestAnimationFrame(timer)
             }
-        }), 1000 / 120)
+        })
     }
 
     movTop() {
@@ -212,18 +221,19 @@ class Square {
         }
 
         var self = this
-        this.timer = setInterval((function() {
+        requestAnimationFrame(function timer() {
             reg += dir
             if (reg >= 360) {
                 reg -= 360
             }
             self.direction = reg
             if (reg == 0) {
-                clearInterval(self.timer)
                 self.animating = false
                 self.traTop()
+            } else {
+                requestAnimationFrame(timer)
             }
-        }), 1000 / 120)
+        })
     }
 
     movRig() {
@@ -243,18 +253,19 @@ class Square {
         }
 
         var self = this
-        this.timer = setInterval((function() {
+        requestAnimationFrame(function timer() {
             reg += dir
             if (reg >= 360) {
                 reg -= 360
             }
             self.direction = reg
             if (reg == 90) {
-                clearInterval(self.timer)
                 self.animating = false
                 self.traRig()
+            } else {
+                requestAnimationFrame(timer)
             }
-        }), 1000 / 120)
+        })
     }
 
     movBot() {
@@ -266,7 +277,7 @@ class Square {
             return
         }
 
-        this.animating = true
+        this.animation()
         if (reg > 180) {
             var dir = -1
         } else {
@@ -274,14 +285,16 @@ class Square {
         }
 
         var self = this
-        this.timer = setInterval((function() {
+        requestAnimationFrame(function timer() {
             reg += dir
             self.direction = reg
             if (reg == 180) {
-                clearInterval(self.timer)
                 self.animating = false
                 self.traBot()
+            } else {
+                requestAnimationFrame(timer)
             }
-        }), 1000 / 120)
+        })
     }
+
 }

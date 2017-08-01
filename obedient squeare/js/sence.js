@@ -5,12 +5,15 @@ class Sence {
 
         this.game = new Game()
 
+
         var self = this
-        setInterval((function() {
+        requestAnimationFrame(function timer() {
             self.clear()
             self.draw()
-        }), 10)
+            requestAnimationFrame(timer)
+        })
     }
+
 
     draw() {
         this.game.map.drawCoordinate()
@@ -34,4 +37,5 @@ class Sence {
     clear() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight)
     }
+
 }

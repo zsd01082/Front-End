@@ -1,0 +1,22 @@
+#id-canvas {
+    margin-left: 400px;
+    margin-top: 200px;
+}
+
+fieldset {
+    border: none;
+    padding-left: 450px;
+    padding-top: 0;
+}
+
+textarea {
+    resize: none;
+    background-color: #000;
+    color: #267428;
+    font-size: 18px;
+}
+
+#id-run {
+    display: block;
+    margin-bottom: 5px;
+}
