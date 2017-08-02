@@ -1,22 +1,33 @@
-#id-canvas {
-    margin-left: 400px;
-    margin-top: 200px;
-}
+#id-canvas {}
 
 fieldset {
     border: none;
-    padding-left: 450px;
-    padding-top: 0;
+    padding-left: 50px;
 }
 
 textarea {
+    width: 400px;
+    height: 200px;
     resize: none;
-    background-color: #000;
+    background: #000;
     color: #267428;
-    font-size: 18px;
+    border: none;
+    font: 18px Arial;
 }
 
 #id-run {
     display: block;
     margin-bottom: 5px;
+}
+
+#id-lineNum {
+    width: 20px;
+    height: 204px;
+    background-color: rgb(204, 204, 204);
+    float: left;
+    font: 18px Arial;
+    padding: 4px;
+    box-sizing: border-box;
+    color: #fff;
+    text-align: center;
 }
