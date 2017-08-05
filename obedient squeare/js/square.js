@@ -1,13 +1,33 @@
 class Square {
-    constructor(x, y) {
+    constructor(x, y, game) {
+        this.game = game
         this.x = x
         this.y = y
-        this.direction = 0
-        this.animating = false
-        var self = this
-        var animating = false
+        this.setup()
     }
 
+    setup() {
+        this.direction = 0
+        this.animating = false
+        this.cmds = []
+        var self = this
+        setInterval((function() {
+            //当方块没有任务正在进行且有新任务时，运行新任务
+            if ((!self.animating) && self.cmds.length != 0) {
+                var cmd = self.cmds[0]
+                self[cmd]()
+                self.cmds.shift()
+                if (self.cmds.length == 0) {
+                    setTimeout((self.game.haveCmds = false), 1000)
+                }
+            }
+        }), 10)
+    }
+
+    recivecmd(cmd) {
+        this.game.haveCmds = true
+        this.cmds.push(cmd)
+    }
 
     go() {
         var reg = this.direction

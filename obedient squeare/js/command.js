@@ -1,6 +1,7 @@
 class Textarea {
-    constructor(id, square) {
-        this.square = square
+    constructor(id, game) {
+        this.game = game
+        this.square = this.game.square
         this.textarea = document.getElementById(id)
         this.setup()
     }
@@ -8,7 +9,6 @@ class Textarea {
     setup() {
         this.numBar = null
         this.vaild = false
-        this.cmds = []
         this.createNumBar(this.id)
         this.textarea.oninput = this.lineCount
         this.textarea.onclick = this.lineCount
@@ -38,21 +38,17 @@ class Textarea {
 
     check() {
         this.vaild = true
-        var commands = []
-        var txts = this.textarea.value.split("\n").map(function(txt) {
-            return txt.trim()
-        })
-        var nums = document.getElementsByClassName("num")
-        for (var i = 0; i < txts.length; i++) {
-            var txt = txts[i].match(/^[A-Za-z]+/)
-            if (!this.square[txt]) {
-                nums[i].style.backgroundColor = "red"
+        var cmds = this.dealcmds()
+        var keys = Object.keys(cmds)
+        for (var i in keys) {
+            var cmd = keys[i]
+            if (!this.square[cmd]) {
+                this.numColor(i, "red")
                 this.vaild = false
             }
         }
         if (this.vaild == true) {
-            this.cmds = txts
-            this.dealcmds()
+            this.game.sendcmd(cmds)
         }
     }
 
@@ -62,12 +58,27 @@ class Textarea {
 
     //textarea内容无误后，处理内容后将内容传给square
     dealcmds() {
-        var cmds = this.cmds
-        for (var i in cmds) {
-            var time = cmds[i].match(/[0-9]+$/) || 1
-            var cmd = cmds[i].match(/^[A-Za-z]+/)
-            log(time, cmd)
+        var txts = this.textarea.value.split("\n").map(function(txt) {
+            return txt.trim()
+        })
+        var cmds = {}
+        for (var i in txts) {
+            var time = txts[i].match(/[0-9]+$/) ? txts[i].match(/[0-9]+$/)[0] : 1
+            var cmd = txts[i].match(/(^\w{3}\s\w{3})|(^go)/i) ? txts[i].match(/(^\w{3}\s\w{3})|(^go)/i)[0] : undefined
+            if (cmd) {
+                cmd = cmd.toLowerCase()
+                cmd = cmd.replace(/\s\w/, function(rs) {
+                    return rs.toUpperCase().trim()
+                })
+            }
+            cmds[cmd] = time
         }
+        return cmds
+    }
+
+    numColor(i, color) {
+        var nums = this.numBar.getElementsByClassName("num")
+        nums[i].style.backgroundColor = color
     }
 
 }
