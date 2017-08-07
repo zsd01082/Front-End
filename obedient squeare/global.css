@@ -17,6 +17,8 @@ textarea {
     border: none;
     font: inherit;
     line-height: 20px;
+    float: left;
+    padding: 2px;
 }
 
 #id-run {

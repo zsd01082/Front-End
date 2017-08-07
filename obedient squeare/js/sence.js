@@ -1,11 +1,8 @@
 class Sence {
-    constructor() {
-        var canvas = document.getElementById("id-canvas")
+    constructor(game) {
+        var canvas = game.canvas
         this.ctx = canvas.getContext("2d")
-
-        this.game = new Game()
-
-
+        this.game = game
         var self = this
         requestAnimationFrame(function timer() {
             self.clear()
@@ -16,22 +13,9 @@ class Sence {
 
 
     draw() {
-        this.game.map.drawCoordinate()
-        this.game.map.drawGrid()
-
-        var o = this.game.square
-        var dir = o.direction * Math.PI / 180
-
-        var x = o.x
-        var y = o.y
-        this.ctx.translate(x, y)
-        this.ctx.rotate(dir)
-        this.ctx.fillStyle = "red"
-        this.ctx.fillRect(-24, -24, 48, 48)
-        this.ctx.fillStyle = "blue"
-        this.ctx.fillRect(-24, -24, 48, 8)
-        this.ctx.rotate(-dir)
-        this.ctx.translate(-x, -y)
+        var ctx = this.ctx
+        this.game.map.draw()
+        this.game.player.draw()
     }
 
     clear() {

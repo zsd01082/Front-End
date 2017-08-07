@@ -1,7 +1,19 @@
 var __main = function() {
-    var sence = new Sence()
+    var canvas = document.getElementById("id-canvas")
+    var game = new Game(canvas)
 }
 
 var log = console.log.bind()
 
+/**
+ * 计算两个数字是否相等
+ */
+var approx = function(a, b, num) {
+    var m = Math.abs(a - b)
+    if (m <= num) {
+        return true
+    } else {
+        return false
+    }
+}
 __main()

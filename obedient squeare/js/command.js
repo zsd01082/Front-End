@@ -1,7 +1,7 @@
 class Textarea {
     constructor(id, game) {
         this.game = game
-        this.square = this.game.square
+        this.player = this.game.player
         this.textarea = document.getElementById(id)
         this.setup()
     }
@@ -36,19 +36,19 @@ class Textarea {
         this.previousSibling.innerHTML = nums
     }
 
+    //textarea内容无误后，处理内容后将内容传给player
     check() {
         this.vaild = true
         var cmds = this.dealcmds()
-        var keys = Object.keys(cmds)
-        for (var i in keys) {
-            var cmd = keys[i]
-            if (!this.square[cmd]) {
+        for (var i = 0; i < cmds.length; i++) {
+            var cmd = Object.keys(cmds[i])[0]
+            if (!this.player[cmd]) {
                 this.numColor(i, "red")
                 this.vaild = false
             }
         }
         if (this.vaild == true) {
-            this.game.sendcmd(cmds)
+            this.player.recivecmds(cmds)
         }
     }
 
@@ -56,12 +56,11 @@ class Textarea {
         this.previousElementSibling.scrollTop = this.scrollTop
     }
 
-    //textarea内容无误后，处理内容后将内容传给square
     dealcmds() {
         var txts = this.textarea.value.split("\n").map(function(txt) {
             return txt.trim()
         })
-        var cmds = {}
+        var cmds = []
         for (var i in txts) {
             var time = txts[i].match(/[0-9]+$/) ? txts[i].match(/[0-9]+$/)[0] : 1
             var cmd = txts[i].match(/(^\w{3}\s\w{3})|(^go)/i) ? txts[i].match(/(^\w{3}\s\w{3})|(^go)/i)[0] : undefined
@@ -71,13 +70,17 @@ class Textarea {
                     return rs.toUpperCase().trim()
                 })
             }
-            cmds[cmd] = time
+            cmds[i] = {}
+            cmds[i][cmd] = time
         }
         return cmds
     }
 
     numColor(i, color) {
         var nums = this.numBar.getElementsByClassName("num")
+        if (!nums[i]) {
+            return false
+        }
         nums[i].style.backgroundColor = color
     }
 
