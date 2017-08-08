@@ -9,12 +9,15 @@ class Player extends Square {
         this.reg = 0
         this.animating = false
         this.cmds = []
+        this.currCmdNum = -1
         var self = this
         setInterval((function() {
             //当方块没有任务正在进行且有新任务时，运行新任务
             if ((!self.animating) && self.cmds.length != 0) {
                 var cmd = Object.keys(self.cmds[0])[0]
                 var times = self.cmds[0][cmd]
+                self.currCmdNum += 1
+                self.game.textarea.numColor(self.currCmdNum, "yellow")
                 self[cmd](times)
                 self.cmds.shift()
                 if (self.cmds.length == 0) {
@@ -40,7 +43,7 @@ class Player extends Square {
         this.ctx.restore()
     }
 
-    rotate(targetReg) {
+    rotate(targetReg, callback) {
         var reg = this.reg
         var self = this
         requestAnimationFrame(function timer() {
@@ -51,12 +54,12 @@ class Player extends Square {
             } else {
                 self.animating = false
                 self.reg = (targetReg > 0) ? targetReg % 360 : (targetReg + 360) % 360
-                log(self.reg)
+                callback && callback()
             }
         })
     }
 
-    move(targetX, targetY) {
+    move(targetX, targetY, callback) {
         var x = this.x
         var y = this.y
         var self = this
@@ -71,7 +74,7 @@ class Player extends Square {
                 self.animating = false
                 self.x = targetX
                 self.y = targetY
-                log(self.x, self.y)
+                callback && callback()
             }
         })
     }
@@ -94,6 +97,7 @@ class Player extends Square {
         }
     }
 
+    //重复代码过多，因抽象简化
     tunLef(times) {
         if (this.animating == true) return false
 
@@ -101,8 +105,12 @@ class Player extends Square {
 
         var reg = this.reg
         var targetReg = reg - 90 * times
-        this.rotate(targetReg)
+        var self = this
+        this.rotate(targetReg, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
     }
+
 
     tunRig(times) {
         if (this.animating == true) return false
@@ -111,7 +119,10 @@ class Player extends Square {
 
         var reg = this.reg
         var targetReg = reg + 90 * times
-        this.rotate(targetReg)
+        var self = this
+        this.rotate(targetReg, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
     }
 
     tunBac(times) {
@@ -121,7 +132,10 @@ class Player extends Square {
 
         var reg = this.reg
         var targetReg = reg + 180 * times
-        this.rotate(targetReg)
+        var self = this
+        this.rotate(targetReg, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
     }
 
     traLef(times) {
@@ -132,7 +146,10 @@ class Player extends Square {
 
         var x = this.x
         var targetX = (x - 1 * times) >= 1 ? (x - 1 * times) : 1
-        this.move(targetX, this.y)
+        var self = this
+        this.move(targetX, this.y, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
     }
 
     traTop(times) {
@@ -143,7 +160,10 @@ class Player extends Square {
 
         var y = this.y
         var targetY = (y - 1 * times) >= 1 ? (y - 1 * times) : 1
-        this.move(this.x, targetY)
+        var self = this
+        this.move(this.x, targetY, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
     }
 
     traRig(times) {
@@ -154,7 +174,10 @@ class Player extends Square {
 
         var x = this.x
         var targetX = (x + 1 * times) <= 10 ? (x + 1 * times) : 10
-        this.move(targetX, this.y)
+        var self = this
+        this.move(targetX, this.y, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
     }
 
     traBot(times) {
@@ -165,131 +188,71 @@ class Player extends Square {
 
         var y = this.y
         var targetY = (y + 1 * times) <= 10 ? (y + 1 * times) : 10
-        this.move(this.x, targetY)
+        var self = this
+        this.move(this.x, targetY, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
     }
 
     movLef(times) {
         if (this.animating == true) return false
 
-        var reg = this.direction
-        if (reg == 270) {
-            this.traLef(times)
-            return
-        }
-
         this.animating = true
-        if (reg < 90 || reg > 270) {
-            var dir = -1
-        } else {
-            var dir = 1
-        }
 
         var self = this
-        requestAnimationFrame(function timer() {
-            reg += dir
-            if (reg < 0) {
-                reg += 360
-            }
-            self.direction = reg
-            if (reg == 270) {
-                self.animating = false
+        if (this.reg < 90) {
+            this.rotate(-90, function() {
                 self.traLef(times)
-            } else {
-                requestAnimationFrame(timer)
-            }
-        })
+            })
+        } else {
+            this.rotate(270, function() {
+                self.traLef(times)
+            })
+        }
     }
 
     movTop(times) {
         if (this.animating == true) return false
 
-        var reg = this.direction
-        if (reg == 0) {
-            this.traTop(times)
-            return
-        }
-
         this.animating = true
-        if (reg < 180) {
-            var dir = -1
-        } else {
-            var dir = 1
-        }
 
         var self = this
-        requestAnimationFrame(function timer() {
-            reg += dir
-            if (reg >= 360) {
-                reg -= 360
-            }
-            self.direction = reg
-            if (reg == 0) {
-                self.animating = false
+        if (this.reg < 180) {
+            this.rotate(0, function() {
                 self.traTop(times)
-            } else {
-                requestAnimationFrame(timer)
-            }
-        })
+            })
+        } else {
+            this.rotate(360, function() {
+                self.traTop(times)
+            })
+        }
     }
 
     movRig(times) {
         if (this.animating == true) return false
 
-        var reg = this.direction
-        if (reg == 90) {
-            this.traRig(times)
-            return
-        }
-
         this.animating = true
-        if (reg < 270 && reg > 90) {
-            var dir = -1
-        } else {
-            var dir = 1
-        }
 
         var self = this
-        requestAnimationFrame(function timer() {
-            reg += dir
-            if (reg >= 360) {
-                reg -= 360
-            }
-            self.direction = reg
-            if (reg == 90) {
-                self.animating = false
+        if (this.reg > 270) {
+            this.rotate(450, function() {
                 self.traRig(times)
-            } else {
-                requestAnimationFrame(timer)
-            }
-        })
+            })
+        } else {
+            this.rotate(90, function() {
+                self.traRig(times)
+            })
+        }
     }
 
     movBot(times) {
         if (this.animating == true) return false
 
-        var reg = this.direction
-        if (reg == 180) {
-            this.traBot(times)
-            return
-        }
-
-        this.animation()
-        if (reg > 180) {
-            var dir = -1
-        } else {
-            var dir = 1
-        }
+        this.animating = true
 
         var self = this
-        requestAnimationFrame(function timer() {
-            reg += dir
-            self.direction = reg
-            if (reg == 180) {
-                self.animating = false
-                self.traBot(times)
-            } else {
-                requestAnimationFrame(timer)
-            }
+        this.rotate(180, function() {
+            self.traBot(times)
         })
     }
 }
