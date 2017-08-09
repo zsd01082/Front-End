@@ -14,11 +14,20 @@ class Player extends Square {
         setInterval((function() {
             //当方块没有任务正在进行且有新任务时，运行新任务
             if ((!self.animating) && self.cmds.length != 0) {
-                var cmd = Object.keys(self.cmds[0])[0]
-                var times = self.cmds[0][cmd]
+                var cmd = self.cmds[0][0]
+                if (cmd == "tun" || cmd == "tra" || cmd == "mov") {
+                    var dir = self.cmds[0][1]
+                    var times = self.cmds[0][2] || 1
+                    self[cmd](dir, times)
+                } else if (cmd == "mov to") {
+                    var des = self.cmds[0][1]
+                    self[cmd](dir)
+                } else if (cmd == "go") {
+                    var times = self.cmds[0][1] || 1
+                    self[cmd](times)
+                }
                 self.currCmdNum += 1
                 self.game.textarea.numColor(self.currCmdNum, "yellow")
-                self[cmd](times)
                 self.cmds.shift()
                 if (self.cmds.length == 0) {
                     setTimeout((self.game.haveCmds = false), 1000)
@@ -81,30 +90,38 @@ class Player extends Square {
 
     recivecmds(cmds) {
         this.game.haveCmds = true
-        this.cmds = this.cmds.concat(cmds)
+        this.cmds = cmds
     }
 
     go(times) {
         var reg = this.reg
         if (reg === 0) {
-            this.traTop(times)
+            this.tra("top", times)
         } else if (reg === 90) {
-            this.traRig(times)
+            this.tra("rig", times)
         } else if (reg === 180) {
-            this.traBot(times)
+            this.tra("bot", times)
         } else if (reg === 270) {
-            this.traLef(times)
+            this.tra("lef", times)
         }
     }
 
-    //重复代码过多，因抽象简化
-    tunLef(times) {
-        if (this.animating == true) return false
-
+    //重复代码过多，应抽象简化
+    tun(dir, times) {
         this.animating = true
 
         var reg = this.reg
-        var targetReg = reg - 90 * times
+        var targetReg = 0
+        if (dir == "lef") {
+            targetReg = reg - 90 * times
+        } else if (dir == "rig") {
+            targetReg = reg + 90 * times
+        } else if (dir == "bac") {
+            targetReg = reg + 180 * times
+        } else {
+            return false
+        }
+
         var self = this
         this.rotate(targetReg, function() {
             self.game.textarea.numColor(self.currCmdNum, "green")
@@ -112,147 +129,66 @@ class Player extends Square {
     }
 
 
-    tunRig(times) {
-        if (this.animating == true) return false
-
+    tra(dir, times) {
         this.animating = true
 
-        var reg = this.reg
-        var targetReg = reg + 90 * times
+        var x = this.x,
+            y = this.y,
+            targetX,
+            targetY
+        if (dir == "lef") {
+            targetX = (x - 1 * times) >= 1 ? (x - 1 * times) : 1
+            targetY = y
+        } else if (dir == "top") {
+            targetX = x
+            targetY = (y - 1 * times) >= 1 ? (y - 1 * times) : 1
+        } else if (dir == "rig") {
+            targetX = (x + 1 * times) <= 10 ? (x + 1 * times) : 10
+            targetY = y
+        } else if (dir == "bot") {
+            targetX = x
+            targetY = (y + 1 * times) <= 10 ? (y + 1 * times) : 10
+        } else {
+            return false
+        }
+
+        var self = this
+        this.move(targetX, targetY, function() {
+            self.game.textarea.numColor(self.currCmdNum, "green")
+        })
+    }
+
+    mov(dir, times) {
+        this.animating = true
+
+        var targetReg
+        if (dir == "lef") {
+            if (this.reg < 90) {
+                targetReg = -90
+            } else {
+                targetReg = 270
+            }
+        } else if (dir == "top") {
+            if (this.reg < 180) {
+                targetReg = 0
+            } else {
+                targetReg = 360
+            }
+        } else if (dir == "rig") {
+            if (this.reg < 270) {
+                targetReg = 90
+            } else {
+                targetReg = 450
+            }
+        } else if (dir == "bot") {
+            targetReg = 180
+        } else {
+            return false
+        }
+
         var self = this
         this.rotate(targetReg, function() {
-            self.game.textarea.numColor(self.currCmdNum, "green")
-        })
-    }
-
-    tunBac(times) {
-        if (this.animating == true) return false
-
-        this.animating = true
-
-        var reg = this.reg
-        var targetReg = reg + 180 * times
-        var self = this
-        this.rotate(targetReg, function() {
-            self.game.textarea.numColor(self.currCmdNum, "green")
-        })
-    }
-
-    traLef(times) {
-        if (this.animating == true) return false
-        if (this.x <= 1) return false
-
-        this.animating = true
-
-        var x = this.x
-        var targetX = (x - 1 * times) >= 1 ? (x - 1 * times) : 1
-        var self = this
-        this.move(targetX, this.y, function() {
-            self.game.textarea.numColor(self.currCmdNum, "green")
-        })
-    }
-
-    traTop(times) {
-        if (this.animating == true) return false
-        if (this.y <= 1) return false
-
-        this.animating = true
-
-        var y = this.y
-        var targetY = (y - 1 * times) >= 1 ? (y - 1 * times) : 1
-        var self = this
-        this.move(this.x, targetY, function() {
-            self.game.textarea.numColor(self.currCmdNum, "green")
-        })
-    }
-
-    traRig(times) {
-        if (this.animating == true) return false
-        if (this.x >= 10) return false
-
-        this.animating = true
-
-        var x = this.x
-        var targetX = (x + 1 * times) <= 10 ? (x + 1 * times) : 10
-        var self = this
-        this.move(targetX, this.y, function() {
-            self.game.textarea.numColor(self.currCmdNum, "green")
-        })
-    }
-
-    traBot(times) {
-        if (this.animating == true) return false
-        if (this.y >= 10) return false
-
-        this.animating = true
-
-        var y = this.y
-        var targetY = (y + 1 * times) <= 10 ? (y + 1 * times) : 10
-        var self = this
-        this.move(this.x, targetY, function() {
-            self.game.textarea.numColor(self.currCmdNum, "green")
-        })
-    }
-
-    movLef(times) {
-        if (this.animating == true) return false
-
-        this.animating = true
-
-        var self = this
-        if (this.reg < 90) {
-            this.rotate(-90, function() {
-                self.traLef(times)
-            })
-        } else {
-            this.rotate(270, function() {
-                self.traLef(times)
-            })
-        }
-    }
-
-    movTop(times) {
-        if (this.animating == true) return false
-
-        this.animating = true
-
-        var self = this
-        if (this.reg < 180) {
-            this.rotate(0, function() {
-                self.traTop(times)
-            })
-        } else {
-            this.rotate(360, function() {
-                self.traTop(times)
-            })
-        }
-    }
-
-    movRig(times) {
-        if (this.animating == true) return false
-
-        this.animating = true
-
-        var self = this
-        if (this.reg > 270) {
-            this.rotate(450, function() {
-                self.traRig(times)
-            })
-        } else {
-            this.rotate(90, function() {
-                self.traRig(times)
-            })
-        }
-    }
-
-    movBot(times) {
-        if (this.animating == true) return false
-
-        this.animating = true
-
-        var self = this
-        this.rotate(180, function() {
-            self.traBot(times)
+            self.tra(dir, times)
         })
     }
 }

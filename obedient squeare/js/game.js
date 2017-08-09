@@ -13,7 +13,7 @@ class Game {
             //如果没有队列在执行，执行新队列
             if (!self.haveCmds) {
                 self.player.currCmdNum = -1
-                self.textarea.check()
+                self.textarea.dealcmds()
             }
         }
     }

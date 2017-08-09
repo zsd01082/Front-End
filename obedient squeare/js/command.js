@@ -8,11 +8,10 @@ class Textarea {
 
     setup() {
         this.numBar = null
-        this.vaild = false
         this.createNumBar(this.id)
-        this.textarea.oninput = this.lineCount
-        this.textarea.onclick = this.lineCount
         this.textarea.onscroll = this.scollWith
+        this.textarea.oninput = this.lineCount
+        this.textarea.oninput()
     }
 
     createNumBar() {
@@ -36,44 +35,36 @@ class Textarea {
         this.previousSibling.innerHTML = nums
     }
 
-    //textarea内容无误后，处理内容后将内容传给player
-    check() {
-        this.vaild = true
-        var cmds = this.dealcmds()
-        for (var i = 0; i < cmds.length; i++) {
-            var cmd = Object.keys(cmds[i])[0]
-            if (!this.player[cmd]) {
-                this.numColor(i, "red")
-                this.vaild = false
-            }
-        }
-        if (this.vaild == true) {
-            this.player.recivecmds(cmds)
-        }
-    }
-
     scollWith() {
         this.previousElementSibling.scrollTop = this.scrollTop
     }
 
+    //检查并处理textarea内容，无误后传给player
     dealcmds() {
         var txts = this.textarea.value.split("\n").map(function(txt) {
             return txt.trim()
         })
+
+        var vaild = true
         var cmds = []
+
+        var reg1 = new RegExp(/^tun\s(?:lef|rig|bac)(?:\s[0-9])?$/, "i"),
+            reg2 = new RegExp(/^(tra|mov)\s(lef|top|rig|bot)(\s[0-9])?$/, "i"),
+            reg3 = new RegExp(/^go(?:\s[0-9])?$/, "i")
         for (var i in txts) {
-            var time = txts[i].match(/[0-9]+$/) ? txts[i].match(/[0-9]+$/)[0] : 1
-            var cmd = txts[i].match(/(^\w{3}\s\w{3})|(^go)/i) ? txts[i].match(/(^\w{3}\s\w{3})|(^go)/i)[0] : undefined
+            var txt = txts[i]
+            var cmd = reg1.exec(txt) || reg2.exec(txt) || reg3.exec(txt)
             if (cmd) {
-                cmd = cmd.toLowerCase()
-                cmd = cmd.replace(/\s\w/, function(rs) {
-                    return rs.toUpperCase().trim()
-                })
+                cmd = cmd[0].toLowerCase().split(" ")
+                cmds.push(cmd)
+            } else {
+                this.numColor(i, "red")
+                vaild = false
             }
-            cmds[i] = {}
-            cmds[i][cmd] = time
         }
-        return cmds
+        if (vaild == true) {
+            this.player.recivecmds(cmds)
+        }
     }
 
     numColor(i, color) {

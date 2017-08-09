@@ -19,6 +19,7 @@ textarea {
     line-height: 20px;
     float: left;
     padding: 2px;
+    margin: 0;
 }
 
 #id-run {
@@ -30,9 +31,9 @@ textarea {
     width: 30px;
     height: 519px;
     background-color: rgb(204, 204, 204);
+    font-size: 14px;
     float: left;
-    font: inherit;
-    padding: 2px;
+    padding: 5px 6px;
     box-sizing: border-box;
     color: #fff;
     text-align: center;
@@ -40,9 +41,9 @@ textarea {
 }
 
 .num {
-    border-radius: 10px;
-    padding-left: 2px;
-    height: 20px;
-    width: 20px;
+    border-radius: 9px;
+    height: 18px;
+    width: 18px;
+    margin-bottom: 2px;
     background: transparent;
 }
