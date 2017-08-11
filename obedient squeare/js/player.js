@@ -8,13 +8,15 @@ class Player extends Square {
     setup() {
         this.reg = 0
         this.cmds = []
-        this.currCmdNum = 0
+        this.currCmdNum = -1
 
         Object.defineProperty(this, 'animating', {
             set: function(animating) {
+                this.game.textarea.numColor(this.currCmdNum, "green")
                 if (animating == false && this.cmds.length != 0) {
-                    this.game.textarea.numColor(this.currCmdNum, "yellow")
+                    this.currCmdNum += 1
                     this.run()
+                    this.game.textarea.numColor(this.currCmdNum, "yellow")
                 }
             },
 
@@ -22,6 +24,7 @@ class Player extends Square {
                 return this.animating
             }
         })
+
     }
 
     draw() {
@@ -38,11 +41,6 @@ class Player extends Square {
         this.ctx.fillStyle = "#acacac"
         this.ctx.fillRect(-24, -24, 48, 8)
         this.ctx.restore()
-    }
-
-    recivecmds(cmds) {
-        this.cmds = cmds
-        this.animating = false
     }
 
     run() {
@@ -96,15 +94,17 @@ class Player extends Square {
 
     go(times) {
         var reg = this.reg
+        var dir = null
         if (reg === 0) {
-            this.tra("top", times)
+            dir = "top"
         } else if (reg === 90) {
-            this.tra("rig", times)
+            dir = "rig"
         } else if (reg === 180) {
-            this.tra("bot", times)
+            dir = "bot"
         } else if (reg === 270) {
-            this.tra("lef", times)
+            dir = "lef"
         }
+        this.tra(dir, times)
     }
 
     tun(dir, times) {
@@ -122,8 +122,6 @@ class Player extends Square {
         var self = this
         this.rotate(targetReg)
             .then(function() {
-                self.game.textarea.numColor(self.currCmdNum, "green")
-                self.currCmdNum += 1
                 self.animating = false
             })
     }
@@ -133,27 +131,21 @@ class Player extends Square {
 
         var x = this.x,
             y = this.y,
-            targetX,
-            targetY
+            targetX = x,
+            targetY = y
         if (dir == "lef") {
             targetX = (x - 1 * times) >= 1 ? (x - 1 * times) : 1
-            targetY = y
         } else if (dir == "top") {
-            targetX = x
             targetY = (y - 1 * times) >= 1 ? (y - 1 * times) : 1
         } else if (dir == "rig") {
             targetX = (x + 1 * times) <= 10 ? (x + 1 * times) : 10
-            targetY = y
         } else if (dir == "bot") {
-            targetX = x
             targetY = (y + 1 * times) <= 10 ? (y + 1 * times) : 10
         }
 
         var self = this
         this.move(targetX, targetY)
             .then(function() {
-                self.game.textarea.numColor(self.currCmdNum, "green")
-                self.currCmdNum += 1
                 self.animating = false
             })
     }
@@ -164,8 +156,8 @@ class Player extends Square {
         var targetReg = null,
             x = this.x,
             y = this.y,
-            targetX = this.x,
-            targetY = this.y
+            targetX = x,
+            targetY = y
         if (dir == "lef") {
             if (this.reg < 90) {
                 targetReg = -90
@@ -198,10 +190,7 @@ class Player extends Square {
                 return self.move(targetX, targetY)
             })
             .then(function() {
-                self.game.textarea.numColor(self.currCmdNum, "green")
-                self.currCmdNum += 1
                 self.animating = false
             })
-
     }
 }

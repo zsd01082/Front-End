@@ -63,7 +63,8 @@ class Textarea {
             }
         }
         if (vaild == true) {
-            this.player.recivecmds(cmds)
+            this.player.cmds = cmds
+            this.player.animating = false
         }
     }
 
