@@ -12,11 +12,14 @@ class Player extends Square {
 
         Object.defineProperty(this, 'animating', {
             set: function(animating) {
-                this.game.textarea.numColor(this.currCmdNum, "green")
-                if (animating == false && this.cmds.length != 0) {
+                if (animating == false) {
+                    this.game.textarea.numColor(this.currCmdNum, "green")
                     this.currCmdNum += 1
-                    this.run()
                     this.game.textarea.numColor(this.currCmdNum, "yellow")
+                    if (this.cmds.length != 0) {
+                        this.run()
+                        this.animating = true
+                    }
                 }
             },
 
@@ -38,26 +41,40 @@ class Player extends Square {
         this.ctx.rotate(reg)
         this.ctx.fillStyle = "red"
         this.ctx.fillRect(-24, -24, 48, 48)
-        this.ctx.fillStyle = "#acacac"
+        this.ctx.fillStyle = "#020181"
         this.ctx.fillRect(-24, -24, 48, 8)
         this.ctx.restore()
     }
 
     run() {
         var aCmd = this.cmds[0]
+        this.cmds.shift()
+        if (!aCmd) return false
         var cmd = aCmd[0]
+        var self = this
         if (cmd == "tun" || cmd == "tra" || cmd == "mov") {
             var dir = aCmd[1]
             var times = aCmd[2] || 1
-            this[cmd](dir, times)
-        } else if (cmd == "mov to") {
-            var des = aCmd[1]
-            this[cmd](dir)
+            self[cmd](dir, times).then(function() {
+                self.animating = false
+            })
         } else if (cmd == "go") {
             var times = aCmd[1] || 1
-            this[cmd](times)
+            self[cmd](times).then(function() {
+                self.animating = false
+            })
+        } else if (cmd == "move to") {
+            var aim = aCmd[1]
+            self.moveTo(aim).then(function() {
+                self.animating = false
+            })
+        } else if (cmd == "build") {
+            var o = self.faceTo()
+            self.game.build(o)
+
+            self.animating = false
         }
-        this.cmds.shift()
+
     }
 
     rotate(targetReg) {
@@ -92,6 +109,24 @@ class Player extends Square {
         })
     }
 
+    faceTo() {
+        var reg = this.reg,
+            x = this.x,
+            y = this.y,
+            y
+        if (reg === 0) {
+            y--
+        } else if (reg === 90) {
+            x++
+        } else if (reg === 180) {
+            y++
+        } else if (reg === 270) {
+            x--
+        }
+
+        return (x + "," + y)
+    }
+
     go(times) {
         var reg = this.reg
         var dir = null
@@ -104,12 +139,13 @@ class Player extends Square {
         } else if (reg === 270) {
             dir = "lef"
         }
-        this.tra(dir, times)
+        var self = this
+        return new Promise(function(resolve, reject) {
+            self.tra(dir, times).then(resolve)
+        })
     }
 
     tun(dir, times) {
-        this.animating = true
-
         var reg = this.reg
         var targetReg = 0
         if (dir == "lef") {
@@ -119,16 +155,14 @@ class Player extends Square {
         } else if (dir == "bac") {
             targetReg = reg + 180 * times
         }
+
         var self = this
-        this.rotate(targetReg)
-            .then(function() {
-                self.animating = false
-            })
+        return new Promise(function(resolve, reject) {
+            self.rotate(targetReg).then(resolve)
+        })
     }
 
     tra(dir, times) {
-        this.animating = true
-
         var x = this.x,
             y = this.y,
             targetX = x,
@@ -144,15 +178,13 @@ class Player extends Square {
         }
 
         var self = this
-        this.move(targetX, targetY)
-            .then(function() {
-                self.animating = false
-            })
+        var self = this
+        return new Promise(function(resolve, reject) {
+            self.move(targetX, targetY).then(resolve)
+        })
     }
 
     mov(dir, times) {
-        this.animating = true
-
         var targetReg = null,
             x = this.x,
             y = this.y,
@@ -185,12 +217,36 @@ class Player extends Square {
         }
 
         var self = this
-        self.rotate(targetReg)
-            .then(function() {
-                return self.move(targetX, targetY)
-            })
-            .then(function() {
-                self.animating = false
-            })
+        return new Promise(function(resolve, reject) {
+            if (times == 0) {
+                resolve()
+                return false
+            }
+            self.rotate(targetReg)
+                .then(function() {
+                    return self.move(targetX, targetY)
+                })
+                .then(resolve)
+        })
+    }
+
+    moveTo(aim) {
+        var x = aim.substr(0, 1) - this.x
+        var y = aim.substr(-1) - this.y
+
+        var dirX = (x > 0) ? "rig" : "lef"
+        var dirY = (y > 0) ? "bot" : "top"
+
+        x = Math.abs(x)
+        y = Math.abs(y)
+
+        var self = this
+        return new Promise(function(resolve, reject) {
+            self.mov(dirY, y)
+                .then(function() {
+                    return self.mov(dirX, x)
+                })
+                .then(resolve)
+        })
     }
 }
