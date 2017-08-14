@@ -47,8 +47,7 @@ class Player extends Square {
     }
 
     run() {
-        var aCmd = this.cmds[0]
-        this.cmds.shift()
+        var aCmd = this.cmds.shift()
         if (!aCmd) return false
         var cmd = aCmd[0]
         var self = this
@@ -64,14 +63,16 @@ class Player extends Square {
                 self.animating = false
             })
         } else if (cmd == "move to") {
-            var aim = aCmd[1]
-            self.moveTo(aim).then(function() {
-                self.animating = false
-            })
+            var path = aCmd[1]
+            this.moveTo(path)
         } else if (cmd == "build") {
             var o = self.faceTo()
             self.game.build(o)
-
+            self.animating = false
+        } else if (cmd == "bru") {
+            var o = self.faceTo()
+            var color = aCmd[1]
+            self.game.bru(o, color)
             self.animating = false
         }
 
@@ -230,7 +231,11 @@ class Player extends Square {
         })
     }
 
-    moveTo(aim) {
+    moveTo(path) {
+        log(path)
+    }
+
+    /* moveTo(aim) {
         var x = aim.substr(0, 1) - this.x
         var y = aim.substr(-1) - this.y
 
@@ -248,5 +253,5 @@ class Player extends Square {
                 })
                 .then(resolve)
         })
-    }
+    } */
 }

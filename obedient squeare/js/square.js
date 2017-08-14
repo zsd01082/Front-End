@@ -12,7 +12,7 @@ class Wall extends Square {
     constructor(x, y, game) {
         super(x, y, game)
         this.ctx = this.game.sence.ctx
-        this.color = "#acacac"
+        this.color = "#000"
     }
 
     draw() {

@@ -2,10 +2,15 @@
     float: left;
 }
 
-fieldset {
+form {
     border: none;
     padding-left: 50px;
     float: left;
+}
+
+fieldset {
+    display: block;
+    border: none;
 }
 
 textarea {
@@ -23,7 +28,6 @@ textarea {
 }
 
 #id-run {
-    display: block;
     margin-bottom: 5px;
 }
 

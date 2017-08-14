@@ -16,4 +16,12 @@ var approx = function(a, b, num) {
         return false
     }
 }
+
+/**
+ * 在[minNum,maxNum]生成一个随机随
+ */
+var randommMathBetween = function(minNum, maxNum) {
+    return math = parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10)
+}
+
 __main()

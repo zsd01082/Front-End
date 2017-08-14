@@ -15,12 +15,11 @@ class Sence {
     draw() {
         var ctx = this.ctx
         this.game.map.draw()
-        this.game.player.draw()
-
         var walls = this.game.walls
         for (var i in this.game.walls) {
             walls[i] && walls[i].draw()
         }
+        this.game.player.draw()
     }
 
     clear() {
