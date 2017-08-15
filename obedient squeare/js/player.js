@@ -63,8 +63,8 @@ class Player extends Square {
                 self.animating = false
             })
         } else if (cmd == "move to") {
-            var path = aCmd[1]
-            this.moveTo(path)
+            var aim = aCmd[1]
+            this.moveTo(aim)
         } else if (cmd == "build") {
             var o = self.faceTo()
             self.game.build(o)
@@ -125,7 +125,7 @@ class Player extends Square {
             x--
         }
 
-        return (x + "," + y)
+        return { x: x, y: y }
     }
 
     go(times) {
@@ -231,13 +231,29 @@ class Player extends Square {
         })
     }
 
-    moveTo(path) {
-        log(path)
+    moveTo(aim) {
+        let path = this.game.search(this, aim)
+        let self = this
+        let p = new Promise(function(resolve, reject) {
+            resolve()
+        })
+        var run = "p"
+        for (let i = 0; i < path.length; i++) {
+            p = p.then(function() {
+                return self.to(path[i])
+            })
+            if (i == path.length - 1) {
+                p = p.then(function() {
+                    self.animating = false
+                })
+            }
+        }
     }
 
-    /* moveTo(aim) {
-        var x = aim.substr(0, 1) - this.x
-        var y = aim.substr(-1) - this.y
+    to(aim) {
+        log(aim)
+        var x = aim.x - this.x
+        var y = aim.y - this.y
 
         var dirX = (x > 0) ? "rig" : "lef"
         var dirY = (y > 0) ? "bot" : "top"
@@ -253,5 +269,5 @@ class Player extends Square {
                 })
                 .then(resolve)
         })
-    } */
+    }
 }

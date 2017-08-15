@@ -5,7 +5,7 @@ class Game {
         this.player = new Player(6, 6, this)
         this.map = new Map(this)
         this.textarea = new Textarea("id-command", this)
-        this.walls = {}
+        this.walls = []
 
         var self = this
         var runButton = document.getElementById("id-run")
@@ -19,20 +19,23 @@ class Game {
 
         var createWallButton = document.getElementById("id-create-wall")
         createWallButton.onclick = function() {
-            var x = randommMathBetween(1, 10),
-                y = randommMathBetween(1, 10),
-                coordinate = x + "," + y,
-                wall = new Wall(x, y, self)
-            self.walls[coordinate] = wall
+            if (self.walls.length == 99) return false
+            do {
+                var x = randommMathBetween(1, 10),
+                    y = randommMathBetween(1, 10),
+                    coordinate = { x: x, y: y }
+            } while ((x == self.player.x && y == self.player.y) || (self.isWall(coordinate)))
+            log(coordinate)
+            self.build(coordinate)
         }
     }
 
     build(coordinate) {
-        var x = coordinate.substr(0, 1)
-        var y = coordinate.substr(-1)
+        var x = coordinate.x
+        var y = coordinate.y
 
         var wall = new Wall(x, y, this)
-        this.walls[coordinate] = wall
+        this.walls.push({ x: x, y: y, wall: wall })
     }
 
 
@@ -98,7 +101,7 @@ class Game {
 
 
     bru(coordinate, color) {
-        var wall = this.walls[coordinate]
+        var wall = this.isWall(coordinate)
         var oldColor = wall.color
         if (wall == undefined) {
             log("there is no wall!!!")
@@ -121,10 +124,9 @@ class Game {
     }
 
     isWall(point) {
-        var coordinate = point.x + "," + point.y
 
-        if (this.walls[coordinate]) {
-            return true
+        if (this.existList(point, this.walls)) {
+            return this.existList(point, this.walls)
         } else if (point.x > 10 || point.x < 1) {
             return true
         } else if (point.y > 10 || point.y < 1) {

@@ -17,7 +17,7 @@ class Sence {
         this.game.map.draw()
         var walls = this.game.walls
         for (var i in this.game.walls) {
-            walls[i] && walls[i].draw()
+            walls[i].wall.draw()
         }
         this.game.player.draw()
     }

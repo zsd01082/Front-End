@@ -78,7 +78,7 @@ class Textarea {
                     this.numColor(i, "red")
                     vaild = false
                 } else {
-                    cmd = ["move to", path]
+                    cmd = ["move to", aim]
                     cmds.push(cmd)
                     cmd = null
                 }
