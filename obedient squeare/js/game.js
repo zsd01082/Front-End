@@ -7,32 +7,35 @@ class Game {
         this.textarea = new Textarea("id-command", this)
         this.walls = []
 
-        var self = this
         var runButton = document.getElementById("id-run")
-        runButton.onclick = function() {
+        runButton.onclick = () => {
             //如果没有队列在执行，执行新队列
-            if (self.player.cmds.length == 0) {
-                self.player.currCmdNum = -1
-                self.textarea.dealcmds()
+            if (this.player.cmds.length == 0) {
+                this.player.currCmdNum = -1
+                this.textarea.dealcmds()
             }
         }
 
         var createWallButton = document.getElementById("id-create-wall")
-        createWallButton.onclick = function() {
-            if (self.walls.length == 99) return false
+        createWallButton.onclick = () => {
+            if (this.walls.length == 99) return false
             do {
                 var x = randommMathBetween(1, 10),
                     y = randommMathBetween(1, 10),
                     coordinate = { x: x, y: y }
-            } while ((x == self.player.x && y == self.player.y) || (self.isWall(coordinate)))
+            } while ((x == this.player.x && y == this.player.y) || (this.isWall(coordinate)))
             log(coordinate)
-            self.build(coordinate)
+            this.build(coordinate)
         }
     }
 
     build(coordinate) {
         var x = coordinate.x
         var y = coordinate.y
+
+        if (this.isWall(coordinate)) {
+            return false
+        }
 
         var wall = new Wall(x, y, this)
         this.walls.push({ x: x, y: y, wall: wall })
