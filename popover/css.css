@@ -41,3 +41,14 @@ img {
     width: 68px;
     height: 38px;
 }
+
+.mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    filter: opacity(.6);
+    background-color: #777777;
+    z-index: 999;
+}
