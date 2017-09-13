@@ -1,0 +1,26 @@
+#table {
+    border-collapse: collapse;
+}
+
+#table td {
+    border: 1px solid #ccc;
+    width: 190px;
+    line-height: 40px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#table thead td {
+    background: #000;
+    color: #fff;
+}
+
+#table thead img {
+    width: 25px;
+    vertical-align: calc(-6px);
+    cursor: pointer;
+}
+
+.sort {
+    float: right;
+}
