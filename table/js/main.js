@@ -79,7 +79,7 @@ const __main = function() {
                     ['小J', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
                     ['小K', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
                     ['小L', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
-                    ['小Q', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
+                    /* ['小Q', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
                     ['小W', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
                     ['小E', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
                     ['小R', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
@@ -95,7 +95,7 @@ const __main = function() {
                     ['小V', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
                     ['小B', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
                     ['小N', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
-                    ['小M', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)],
+                    ['小M', randomInt(0, 100), randomInt(0, 100), randomInt(0, 100), randomInt(0, 100)], */
                 ],
             },
             sortable: true,

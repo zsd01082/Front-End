@@ -1,5 +1,12 @@
+td {
+    padding: 0;
+}
+
 table {
     border-collapse: collapse;
+    margin-top: 500px;
+    margin-bottom: 2000px;
+    position: relative
 }
 
 table td {
@@ -16,10 +23,10 @@ table thead img {
     cursor: pointer;
 }
 
-.sort {
-    float: right;
+table thead {
+    z-index: 999;
 }
 
-body {
-    padding-top: 500px;
+.sort {
+    float: right;
 }

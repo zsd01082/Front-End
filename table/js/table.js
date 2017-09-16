@@ -1,6 +1,5 @@
 class Table {
     constructor(o) {
-        log(o)
         this.append = o.append
         this.data = o.data
         this.sortable = o.sortable
@@ -10,36 +9,41 @@ class Table {
     }
 
     renderTable() {
-        if (this.table) {
-            this.table.innerHTML = ''
-        }
         let table = document.createElement('table')
-        this.append.appendChild(table)
-
-        //表头
         let thead = document.createElement('thead')
+        let tbody = document.createElement('tbody')
+        this.table = table
+        this.thead = thead
+        this.tbody = tbody
+        this.append.appendChild(table)
         table.appendChild(thead)
+        table.appendChild(tbody)
+        this.renderThead()
+        this.renderTbody()
+        this.setTable()
+    }
+
+    renderThead() {
+        this.thead.innerHTML = ''
         for (let i = 0; i < this.data.thead.length; i++) {
             let td = document.createElement('td')
             td.innerHTML = this.data.thead[i]
-            thead.appendChild(td)
+            this.thead.appendChild(td)
             td.style.backgroundColor = this.headColor
         }
+    }
 
-        //表身
-        let tbody = document.createElement('tbody')
-        table.appendChild(tbody)
+    renderTbody() {
+        this.tbody.innerHTML = ''
         for (let i = 0; i < this.data.tbody.length; i++) {
             let tr = document.createElement('tr')
-            tbody.appendChild(tr)
+            this.tbody.appendChild(tr)
             for (let j = 0; j < this.data.tbody[i].length; j++) {
                 let td = document.createElement('td')
                 td.innerHTML = this.data.tbody[i][j]
                 tr.appendChild(td)
             }
         }
-        this.table = table
-        this.setTable()
     }
 
     setTable() {
@@ -78,18 +82,31 @@ class Table {
                 this.data.tbody.sort((a, b) => {
                     return a[i] - b[i]
                 })
-                this.renderTable()
+                this.renderTbody()
             },
             down: () => {
                 this.data.tbody.sort((a, b) => {
                     return b[i] - a[i]
                 })
-                this.renderTable()
+                this.renderTbody()
             },
         }
     }
 
     headForzen() {
-        log('headForzen')
+        let offsetY = this.thead.clientHeight
+        let clientY = parseInt(document.defaultView.getComputedStyle(this.table)['marginTop'])
+        let top = this.table.offsetTop
+        let bottom = top + this.table.clientHeight
+        document.addEventListener('scroll', event => {
+            if (window.scrollY > top && window.scrollY < bottom) {
+                this.thead.style.position = 'fixed'
+                this.thead.style.top = '0'
+                this.table.style.marginTop = clientY + offsetY + 'px'
+            } else {
+                this.thead.style.position = 'unset'
+                this.table.style.marginTop = clientY + 'px'
+            }
+        })
     }
 }
