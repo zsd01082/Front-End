@@ -1,7 +1,4 @@
 table {
-    padding: 10px;
-    color: #fff;
-    margin: auto;
     border-top: 1px solid #747474;
     background-color: #515151;
 }
@@ -15,4 +12,26 @@ table td {
 
 table tbody td:hover {
     border: 2px solid #979797;
+}
+
+.calendar {
+    padding: 10px;
+    margin: auto;
+    background-color: #515151;
+    color: #fff;
+    font-family: 'microsoft Yahei';
+    width: fit-content;
+    width: -moz-fit-content;
+}
+
+.timerBar {
+    line-height: 35px;
+    position: relative;
+}
+
+.changeDate {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
 }

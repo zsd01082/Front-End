@@ -5,11 +5,13 @@ class Calendar {
         this.thead = null
         this.tbody = null
         this.nowDate = nowDate
-        this.getDates(nowDate)
+        this.getDates()
+        this.renderTable()
         this.highlightDate(nowDate)
     }
 
-    getDates(date) {
+    getDates() {
+        let date = this.nowDate
         let first = new Date(new Date(date).setDate(1)),
             firDate = first.getDate(),
             firDay = first.getDay()
@@ -33,24 +35,59 @@ class Calendar {
             dates.push('')
             tmpDay++
         }
+        this.dates = []
         this.dates.push(dates.slice(0, 7))
         this.dates.push(dates.slice(7, 14))
         this.dates.push(dates.slice(14, 21))
         this.dates.push(dates.slice(21, 28))
         this.dates.push(dates.slice(28, 35))
-        this.renderTable()
     }
 
     renderTable() {
+        let calendar = document.createElement('div')
+        calendar.className = "calendar"
+        let timeBar = document.createElement('div')
+        timeBar.className = "timerBar"
         let table = document.createElement('table')
         let thead = document.createElement('thead')
         let tbody = document.createElement('tbody')
+        this.calendar = calendar
         this.table = table
         this.thead = thead
         this.tbody = tbody
+        this.timeBar = timeBar
+        calendar.appendChild(timeBar)
+        calendar.appendChild(table)
         table.appendChild(thead)
         table.appendChild(tbody)
+        this.renderTimeBar()
         this.renderThead()
+        this.renderTbody()
+    }
+
+    renderTimeBar() {
+        let date = this.nowDate
+        this.timeBar.innerHTML = date.getFullYear() + '年' + (date.getMonth() + 1) + '月'
+
+        //添加调节月份按钮
+        let changeDate = document.createElement('div')
+        changeDate.className = 'changeDate'
+        this.timeBar.appendChild(changeDate)
+        let beforeMonth = document.createElement('img')
+        let afterMonth = document.createElement('img')
+        beforeMonth.src = 'img/before.png'
+        afterMonth.src = 'img/after.png'
+        changeDate.appendChild(beforeMonth)
+        changeDate.appendChild(afterMonth)
+        beforeMonth.onclick = () => this.changeMonth(-1)
+        afterMonth.onclick = () => this.changeMonth(+1)
+    }
+
+    changeMonth(offsetMonth) {
+        let date = this.nowDate
+        this.nowDate = new Date(new Date(new Date(date).setMonth(date.getMonth() + offsetMonth)))
+        this.getDates()
+        this.renderTimeBar()
         this.renderTbody()
     }
 
@@ -91,6 +128,6 @@ class Calendar {
     }
 
     appendIn(e) {
-        e.appendChild(this.table)
+        e.appendChild(this.calendar)
     }
 }
