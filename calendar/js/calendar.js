@@ -1,13 +1,15 @@
 class Calendar {
-    constructor(nowDate) {
+    constructor(nowDate, resELe) {
+        this.resELe = resELe
         this.dates = []
         this.table = null
         this.thead = null
         this.tbody = null
         this.nowDate = nowDate
+        this.choiceDate = nowDate
         this.getDates()
         this.renderTable()
-        this.highlightDate(nowDate)
+        this.highlightDate()
     }
 
     getDates() {
@@ -63,6 +65,18 @@ class Calendar {
         this.renderTimeBar()
         this.renderThead()
         this.renderTbody()
+        this.selectDate()
+    }
+
+    selectDate() {
+        this.tbody.addEventListener('click', event => {
+            if (event.target.innerHTML != '') {
+                this.unHighlightDate()
+                this.choiceDate = new Date(new Date(this.nowDate).setDate(event.target.innerHTML))
+                this.highlightDate()
+                this.resELe.innerHTML = this.choiceDate
+            }
+        })
     }
 
     renderTimeBar() {
@@ -89,6 +103,7 @@ class Calendar {
         this.getDates()
         this.renderTimeBar()
         this.renderTbody()
+        this.highlightDate()
     }
 
     renderThead() {
@@ -114,15 +129,34 @@ class Calendar {
         }
     }
 
-    highlightDate(date) {
-        let day = date.getDate()
-        for (let i = 0; i < this.dates.length; i++) {
-            let index = this.dates[i].indexOf(day)
-            if (index != -1) {
-                let column = index
-                let row = i
-                let o = this.tbody.getElementsByTagName('tr')[row].getElementsByTagName('td')[column]
-                o.style.backgroundColor = '#3f3f3f'
+    highlightDate() {
+        let date = this.choiceDate
+        if (date.getFullYear() == this.nowDate.getFullYear() && date.getMonth() == this.nowDate.getMonth()) {
+            let day = date.getDate()
+            for (let i = 0; i < this.dates.length; i++) {
+                let index = this.dates[i].indexOf(day)
+                if (index != -1) {
+                    let column = index
+                    let row = i
+                    let o = this.tbody.getElementsByTagName('tr')[row].getElementsByTagName('td')[column]
+                    o.style.backgroundColor = '#3f3f3f'
+                }
+            }
+        }
+    }
+
+    unHighlightDate() {
+        let date = this.choiceDate
+        if (date.getFullYear() == this.nowDate.getFullYear() && date.getMonth() == this.nowDate.getMonth()) {
+            let day = date.getDate()
+            for (let i = 0; i < this.dates.length; i++) {
+                let index = this.dates[i].indexOf(day)
+                if (index != -1) {
+                    let column = index
+                    let row = i
+                    let o = this.tbody.getElementsByTagName('tr')[row].getElementsByTagName('td')[column]
+                    o.style.backgroundColor = ''
+                }
             }
         }
     }
