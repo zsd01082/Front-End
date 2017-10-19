@@ -1,15 +1,29 @@
 class Calendar {
-    constructor(nowDate, resELe) {
-        this.resELe = resELe
-        this.dates = []
+    constructor(o) {
+        this.inputEle = o.input
         this.table = null
         this.thead = null
         this.tbody = null
-        this.nowDate = nowDate
-        this.choiceDate = nowDate
-        this.getDates()
+        this.nowDate = o.date
+        this.choiceDate = null
+        this.returnType = o.returnType
         this.renderTable()
-        this.highlightDate()
+        this.setInput()
+        this.appendIn(o.appendIn)
+    }
+
+    setInput() {
+        if (!this.inputEle) return false
+        this.calendar.style.display = 'none'
+        this.inputEle.onfocus = () => {
+            this.calendar.style.display = 'block'
+        }
+
+        document.onclick = event => {
+            if (!belong(event.target, this.inputEle.parentElement) && this.calendar) {
+                this.calendar.style.display = 'none'
+            }
+        }
     }
 
     getDates() {
@@ -37,19 +51,21 @@ class Calendar {
             dates.push('')
             tmpDay++
         }
-        this.dates = []
-        this.dates.push(dates.slice(0, 7))
-        this.dates.push(dates.slice(7, 14))
-        this.dates.push(dates.slice(14, 21))
-        this.dates.push(dates.slice(21, 28))
-        this.dates.push(dates.slice(28, 35))
+        let res = []
+        res.push(dates.slice(0, 7))
+        res.push(dates.slice(7, 14))
+        res.push(dates.slice(14, 21))
+        res.push(dates.slice(21, 28))
+        res.push(dates.slice(28, 35))
+        return res
     }
 
     renderTable() {
         let calendar = document.createElement('div')
-        calendar.className = "calendar"
+        calendar.className = 'calendar'
+        calendar.id = 'calendar'
         let timeBar = document.createElement('div')
-        timeBar.className = "timerBar"
+        timeBar.className = "timeBar"
         let table = document.createElement('table')
         let thead = document.createElement('thead')
         let tbody = document.createElement('tbody')
@@ -65,23 +81,46 @@ class Calendar {
         this.renderTimeBar()
         this.renderThead()
         this.renderTbody()
-        this.selectDate()
+        if (this.returnType == 'date') {
+            this.selectDate()
+        } else if (this.returnType == 'time') {
+            this.selectTime()
+        }
+    }
+
+    selectTime() {
+        let time = [null, this.nowDate]
+        this.tbody.addEventListener('click', event => {
+            if (event.target.innerHTML != '') {
+                this.choiceDate = new Date(new Date(this.nowDate).setDate(event.target.innerHTML))
+                let choiceDate = new Date(this.nowDate.getFullYear(), this.nowDate.getMonth(), event.target.innerHTML)
+                time.push(choiceDate)
+                time.shift()
+                log(time)
+            }
+        })
     }
 
     selectDate() {
+        this.choiceDate = this.nowDate
+        this.highlightDate(this.choiceDate)
         this.tbody.addEventListener('click', event => {
             if (event.target.innerHTML != '') {
-                this.unHighlightDate()
+                this.highlightDate(this.choiceDate, false)
                 this.choiceDate = new Date(new Date(this.nowDate).setDate(event.target.innerHTML))
-                this.highlightDate()
-                this.resELe.innerHTML = this.choiceDate
+                this.highlightDate(this.choiceDate)
+                this.inputEle.value = this.choiceDate.getFullYear() + '-' + this.choiceDate.getMonth() + '-' + this.choiceDate.getDate()
             }
         })
     }
 
     renderTimeBar() {
         let date = this.nowDate
-        this.timeBar.innerHTML = date.getFullYear() + '年' + (date.getMonth() + 1) + '月'
+
+        //显示日期
+        let displayTime = document.createElement('div')
+        this.timeBar.appendChild(displayTime)
+        this.displayTime()
 
         //添加调节月份按钮
         let changeDate = document.createElement('div')
@@ -97,13 +136,18 @@ class Calendar {
         afterMonth.onclick = () => this.changeMonth(+1)
     }
 
+    displayTime() {
+        let date = this.nowDate
+        let displayPath = this.timeBar.getElementsByTagName('div')[0]
+        displayPath.innerHTML = date.getFullYear() + '年' + (date.getMonth() + 1) + '月'
+    }
+
     changeMonth(offsetMonth) {
         let date = this.nowDate
         this.nowDate = new Date(new Date(new Date(date).setMonth(date.getMonth() + offsetMonth)))
-        this.getDates()
-        this.renderTimeBar()
+        this.displayTime()
         this.renderTbody()
-        this.highlightDate()
+        this.highlightDate(this.choiceDate)
     }
 
     renderThead() {
@@ -118,44 +162,36 @@ class Calendar {
 
     renderTbody() {
         this.tbody.innerHTML = ''
-        for (let i = 0; i < this.dates.length; i++) {
+        let dates = this.getDates()
+        for (let i = 0; i < dates.length; i++) {
             let tr = document.createElement('tr')
             this.tbody.appendChild(tr)
-            for (let j = 0; j < this.dates[i].length; j++) {
+            for (let j = 0; j < dates[i].length; j++) {
                 let td = document.createElement('td')
-                td.innerHTML = this.dates[i][j]
+                td.innerHTML = dates[i][j]
                 tr.appendChild(td)
             }
         }
     }
 
-    highlightDate() {
-        let date = this.choiceDate
-        if (date.getFullYear() == this.nowDate.getFullYear() && date.getMonth() == this.nowDate.getMonth()) {
-            let day = date.getDate()
-            for (let i = 0; i < this.dates.length; i++) {
-                let index = this.dates[i].indexOf(day)
-                if (index != -1) {
-                    let column = index
-                    let row = i
-                    let o = this.tbody.getElementsByTagName('tr')[row].getElementsByTagName('td')[column]
-                    o.style.backgroundColor = '#3f3f3f'
-                }
-            }
-        }
-    }
 
-    unHighlightDate() {
-        let date = this.choiceDate
+    highlightDate(date, highlight = true) {
+        /*         if (!this.choiceDate) return false
+                let date = this.choiceDate */
         if (date.getFullYear() == this.nowDate.getFullYear() && date.getMonth() == this.nowDate.getMonth()) {
             let day = date.getDate()
-            for (let i = 0; i < this.dates.length; i++) {
-                let index = this.dates[i].indexOf(day)
+            let dates = this.getDates()
+            for (let i = 0; i < dates.length; i++) {
+                let index = dates[i].indexOf(day)
                 if (index != -1) {
                     let column = index
                     let row = i
                     let o = this.tbody.getElementsByTagName('tr')[row].getElementsByTagName('td')[column]
-                    o.style.backgroundColor = ''
+                    if (highlight == true) {
+                        o.style.backgroundColor = '#3f3f3f'
+                    } else if (highlight == false) {
+                        o.style.backgroundColor = ''
+                    }
                 }
             }
         }

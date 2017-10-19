@@ -16,7 +16,6 @@ table tbody td:hover {
 
 .calendar {
     padding: 10px;
-    margin: auto;
     background-color: #515151;
     color: #fff;
     font-family: 'microsoft Yahei';
@@ -24,7 +23,7 @@ table tbody td:hover {
     width: -moz-fit-content;
 }
 
-.timerBar {
+.timeBar {
     line-height: 35px;
     position: relative;
 }
@@ -34,4 +33,8 @@ table tbody td:hover {
     top: 0;
     right: 0;
     cursor: pointer;
+}
+
+#input-calendar {
+    width: 366px;
 }
