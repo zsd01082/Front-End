@@ -21,17 +21,16 @@ class WaterFall {
     }
 
     /**
-     * @desc 使插件工作
-     * - 隐藏 container 与其子元素 items
-     * - 创建列
-     * - 将 items 添加到 高度最小的列中
-     * - 显示 container 与其子元素 items
+     * @desc make plugin work
+     * - create columns
+     * - calc shortest column
+     * - add items into shortest column
      */
     _create() {
         let opts = this.opts,
             gap = opts.colGap / 2
 
-        this.items = this.container.children //container内所有项目
+        this.items = this.container.children //all children of container
 
 
         //set minWidth of container 
